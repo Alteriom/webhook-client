@@ -1,0 +1,2604 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Alteriom Webhook Connector",
+    "version": "1.2.0",
+    "description": "# Alteriom Webhook Connector API\n\nLightweight webhook connector that receives GitHub App webhooks, persists events, and dispatches them to external AI agents via HTTP POST and WebSocket.\n\n## Key Features\n\n- **Event Persistence** — All GitHub webhook events are stored in PostgreSQL with full payload\n- **HTTP Dispatch** — Queued delivery with retries and exponential backoff via BullMQ\n- **WebSocket Streaming** — Real-time event push via Socket.IO on `/ws`\n- **V2 Advanced Filtering** — Compound event.action subscriptions, glob patterns, payload conditions\n- **Event Batching** — Aggregate rapid-fire events into batches\n- **HMAC Verification** — Timing-safe signature verification for both GitHub and subscriber delivery\n\n## Authentication\n\n- **API endpoints** (`/api/*`): Bearer token authentication with the configured API_KEY\n- **Webhook endpoint** (`/webhooks/github`): GitHub HMAC-SHA256 signature verification\n- **Dashboard** (`/`): Basic HTTP authentication\n\n## WebSocket (Socket.IO)\n\nConnect to `/ws` with Socket.IO:\n\n```javascript\nconst socket = io('http://<host>', {\n  path: '/ws',\n  auth: { apiKey: '<API_KEY>', name: 'my-agent' }\n});\nsocket.on('webhook-event', (event) => { /* ... */ });\n```\n\n## Rate Limiting\n\n- Webhook endpoint: 120 requests/minute\n- API endpoints: No rate limit (API key required)",
+    "contact": {
+      "name": "Alteriom",
+      "url": "https://github.com/Alteriom"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Subscribers (V2)",
+      "description": "Advanced subscriber management with compound events, glob filters, payload conditions, and batching"
+    },
+    {
+      "name": "Subscribers (V1)",
+      "description": "Basic subscriber management"
+    },
+    {
+      "name": "Events",
+      "description": "Webhook event querying, delivery tracking, and replay"
+    },
+    {
+      "name": "Webhooks",
+      "description": "GitHub webhook receiver and status"
+    },
+    {
+      "name": "Dashboard",
+      "description": "Dashboard statistics and time-series data"
+    },
+    {
+      "name": "System",
+      "description": "Health checks and Prometheus metrics"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API key passed as Bearer token. Set via API_KEY environment variable."
+      },
+      "BasicAuth": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "Dashboard auth (DASHBOARD_USER / DASHBOARD_PASSWORD)"
+      },
+      "WebhookSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Hub-Signature-256",
+        "description": "GitHub webhook HMAC-SHA256 signature"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Validation failed"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Field-level validation errors"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "description": "Standard error response"
+      },
+      "SuccessMessage": {
+        "type": "object",
+        "properties": {
+          "replayed": {
+            "type": "boolean"
+          },
+          "received": {
+            "type": "boolean"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "description": "Generic success response"
+      },
+      "IncludeExcludeFilter": {
+        "type": "object",
+        "properties": {
+          "include": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "maxItems": 50,
+            "description": "Patterns to include (allowlist). Supports glob wildcards (*)",
+            "example": [
+              "Alteriom/*",
+              "Alteriom/my-repo"
+            ]
+          },
+          "exclude": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "maxItems": 50,
+            "description": "Patterns to exclude (blocklist). Supports glob wildcards (*)",
+            "example": [
+              "Alteriom/archived-*"
+            ]
+          }
+        },
+        "description": "Include/exclude filter with glob pattern support"
+      },
+      "PayloadCondition": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Dot-notation path into the GitHub payload",
+            "example": "pull_request.draft"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "neq",
+              "in",
+              "exists",
+              "startsWith"
+            ],
+            "description": "Comparison operator"
+          },
+          "value": {
+            "description": "Value to compare against. Not required for \"exists\" operator.",
+            "example": false
+          }
+        },
+        "required": [
+          "field",
+          "op"
+        ],
+        "description": "Payload field condition for deep filtering"
+      },
+      "V2Filters": {
+        "type": "object",
+        "properties": {
+          "_version": {
+            "type": "number",
+            "enum": [
+              2
+            ],
+            "default": 2,
+            "description": "Filter schema version"
+          },
+          "repositories": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IncludeExcludeFilter"
+              },
+              {
+                "description": "Repository name filter (owner/repo)"
+              }
+            ]
+          },
+          "branches": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IncludeExcludeFilter"
+              },
+              {
+                "description": "Branch name filter"
+              }
+            ]
+          },
+          "senders": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IncludeExcludeFilter"
+              },
+              {
+                "description": "GitHub username filter"
+              }
+            ]
+          },
+          "labels": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IncludeExcludeFilter"
+              },
+              {
+                "description": "Issue/PR label filter"
+              }
+            ]
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayloadCondition"
+            },
+            "maxItems": 10,
+            "description": "Deep payload conditions (AND logic, max 10)"
+          }
+        },
+        "description": "V2 advanced filter configuration"
+      },
+      "BatchingConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable event batching"
+          },
+          "window_ms": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 60000,
+            "default": 5000,
+            "description": "Time window to accumulate events (ms)",
+            "example": 5000
+          },
+          "max_batch_size": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 100,
+            "default": 50,
+            "description": "Flush immediately when batch reaches this size",
+            "example": 50
+          },
+          "group_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "repository",
+                "event",
+                "sender"
+              ]
+            },
+            "default": [
+              "repository",
+              "event"
+            ],
+            "description": "Dimensions to group events by",
+            "example": [
+              "repository",
+              "event"
+            ]
+          }
+        },
+        "description": "Event batching configuration"
+      },
+      "DeliveryConfig": {
+        "type": "object",
+        "properties": {
+          "timeout_ms": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 120000,
+            "description": "HTTP delivery timeout (ms)",
+            "example": 30000
+          },
+          "max_retries": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20,
+            "description": "Maximum retry attempts",
+            "example": 5
+          },
+          "backoff_base_ms": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 60000,
+            "description": "Base backoff interval for retries (ms)",
+            "example": 5000
+          }
+        },
+        "description": "Delivery retry configuration"
+      },
+      "Subscriber": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique subscriber ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Subscriber name",
+            "example": "my-ai-agent"
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "HTTP endpoint for event delivery"
+          },
+          "secret": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "HMAC shared secret (masked in responses)"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Event patterns subscribed to",
+            "example": [
+              "push",
+              "pull_request.opened"
+            ]
+          },
+          "filters": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Filter configuration (v1 or v2 format)"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether the subscriber is active"
+          },
+          "delivery_config": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeliveryConfig"
+              },
+              {
+                "description": "Delivery retry settings"
+              }
+            ]
+          },
+          "batching_config": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BatchingConfig"
+              },
+              {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Batching configuration (v2)"
+              }
+            ]
+          },
+          "filter_version": {
+            "type": "integer",
+            "description": "Filter schema version (1 or 2)",
+            "example": 2
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url",
+          "secret",
+          "events",
+          "filters",
+          "active",
+          "delivery_config",
+          "created_at",
+          "updated_at"
+        ],
+        "description": "Webhook event subscriber (agent registration)"
+      },
+      "SubscriberWithStats": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Subscriber"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "delivery_stats": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "success": {
+                    "type": "integer"
+                  },
+                  "failed": {
+                    "type": "integer"
+                  },
+                  "dead": {
+                    "type": "integer"
+                  },
+                  "avg_latency_ms": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "last_delivery_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "total",
+                  "success",
+                  "failed",
+                  "dead",
+                  "avg_latency_ms",
+                  "last_delivery_at"
+                ],
+                "description": "Aggregate delivery statistics"
+              }
+            },
+            "required": [
+              "delivery_stats"
+            ]
+          }
+        ],
+        "description": "Subscriber with delivery statistics"
+      },
+      "WebhookEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Internal event ID"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "GitHub delivery ID",
+            "example": "a1b2c3d4-e5f6-..."
+          },
+          "event_type": {
+            "type": "string",
+            "description": "GitHub event type",
+            "example": "push"
+          },
+          "action": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Event action",
+            "example": "opened"
+          },
+          "repository": {
+            "type": "string",
+            "description": "Repository full name",
+            "example": "Alteriom/my-repo"
+          },
+          "sender": {
+            "type": "string",
+            "description": "GitHub username",
+            "example": "developer"
+          },
+          "installation_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "GitHub App installation ID"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Full GitHub webhook payload"
+          },
+          "headers": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {},
+            "description": "Original webhook headers"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "completed",
+              "failed"
+            ],
+            "description": "Processing status"
+          },
+          "error_message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Error message if failed"
+          },
+          "retry_count": {
+            "type": "integer",
+            "description": "Number of processing retries"
+          },
+          "processed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When processing completed"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event was received"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "event_id",
+          "event_type",
+          "repository",
+          "sender",
+          "payload",
+          "status",
+          "retry_count",
+          "created_at",
+          "updated_at"
+        ],
+        "description": "Persisted GitHub webhook event"
+      },
+      "Delivery": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Delivery ID"
+          },
+          "subscriber_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Target subscriber"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Source event"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "success",
+              "failed",
+              "dead"
+            ],
+            "description": "Delivery status"
+          },
+          "attempt": {
+            "type": "integer",
+            "description": "Attempt number"
+          },
+          "status_code": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "HTTP response status code"
+          },
+          "latency_ms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Response latency in ms"
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Error message if failed"
+          },
+          "response_body": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Response body (truncated)"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the delivery was created"
+          },
+          "delivered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When delivery succeeded"
+          },
+          "subscriber_name": {
+            "type": "string",
+            "description": "Subscriber name (joined)"
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Event type (joined)"
+          },
+          "event_action": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Event action (joined)"
+          },
+          "repository": {
+            "type": "string",
+            "description": "Repository (joined)"
+          },
+          "delivery_id": {
+            "type": "string",
+            "description": "GitHub delivery ID (joined)"
+          }
+        },
+        "required": [
+          "id",
+          "subscriber_id",
+          "event_id",
+          "status",
+          "attempt",
+          "status_code",
+          "latency_ms",
+          "error",
+          "response_body",
+          "created_at",
+          "delivered_at"
+        ],
+        "description": "Outbound event delivery attempt"
+      },
+      "EventStatistics": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "pending": {
+            "type": "integer"
+          },
+          "completed": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "pending",
+          "completed",
+          "failed"
+        ],
+        "description": "Aggregate event statistics"
+      },
+      "DeliveryStatistics": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "pending": {
+            "type": "integer"
+          },
+          "success": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "dead": {
+            "type": "integer"
+          },
+          "avg_latency_ms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "total",
+          "pending",
+          "success",
+          "failed",
+          "dead",
+          "avg_latency_ms"
+        ],
+        "description": "Aggregate delivery statistics"
+      },
+      "RepositoryBreakdown": {
+        "type": "object",
+        "properties": {
+          "repository": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "completed": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "latest": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "repository",
+          "total",
+          "completed",
+          "failed",
+          "latest"
+        ],
+        "description": "Per-repository event summary"
+      },
+      "TimeSeriesBucket": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "events": {
+            "type": "integer"
+          },
+          "completed": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bucket",
+          "events",
+          "completed",
+          "failed"
+        ],
+        "description": "Time-bucketed event count"
+      },
+      "DashboardStats": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "$ref": "#/components/schemas/EventStatistics"
+          },
+          "deliveries": {
+            "$ref": "#/components/schemas/DeliveryStatistics"
+          },
+          "subscriber_count": {
+            "type": "integer"
+          },
+          "active_subscribers": {
+            "type": "integer"
+          },
+          "ws_client_count": {
+            "type": "integer"
+          },
+          "uptime_seconds": {
+            "type": "integer"
+          },
+          "repo_breakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RepositoryBreakdown"
+            }
+          }
+        },
+        "required": [
+          "events",
+          "deliveries",
+          "subscriber_count",
+          "active_subscribers",
+          "ws_client_count",
+          "uptime_seconds",
+          "repo_breakdown"
+        ],
+        "description": "Complete dashboard statistics"
+      },
+      "TestPingResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "status_code": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "latency_ms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "status_code",
+          "latency_ms"
+        ],
+        "description": "Test ping delivery result"
+      },
+      "HealthCheck": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "degraded",
+              "unhealthy"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "string"
+          },
+          "uptime_seconds": {
+            "type": "number"
+          },
+          "checks": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "up",
+                    "down"
+                  ]
+                },
+                "latency_ms": {
+                  "type": "number"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            }
+          }
+        },
+        "required": [
+          "status",
+          "timestamp",
+          "version",
+          "uptime_seconds",
+          "checks"
+        ],
+        "description": "System health check result"
+      },
+      "FilterHelp": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer"
+          },
+          "events": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "examples": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "description",
+              "examples"
+            ]
+          },
+          "filters": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "batching": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "common_configurations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "config": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "required": [
+                "name",
+                "config"
+              ]
+            }
+          }
+        },
+        "required": [
+          "version",
+          "events",
+          "filters",
+          "batching",
+          "common_configurations"
+        ],
+        "description": "V2 filter documentation and examples"
+      },
+      "WebhookStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "uptime": {
+            "type": "string"
+          },
+          "event_stats": {
+            "$ref": "#/components/schemas/EventStatistics"
+          },
+          "delivery_stats": {
+            "$ref": "#/components/schemas/DeliveryStatistics"
+          },
+          "subscriber_count": {
+            "type": "integer"
+          },
+          "ws_client_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status",
+          "uptime",
+          "event_stats",
+          "delivery_stats",
+          "subscriber_count",
+          "ws_client_count"
+        ],
+        "description": "Connector operational status"
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/subscribers": {
+      "post": {
+        "tags": [
+          "Subscribers (V1)"
+        ],
+        "summary": "Register a new subscriber",
+        "description": "Create an HTTP subscriber that will receive webhook events. V1 API supports simple event filtering.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "example": "my-ai-agent"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://your-agent.example.com/webhook"
+                  },
+                  "secret": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 255,
+                    "example": "a-strong-shared-secret"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "push",
+                      "pull_request",
+                      "issues"
+                    ]
+                  },
+                  "filters": {
+                    "type": "object",
+                    "properties": {
+                      "repositories": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "actions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "delivery_config": {
+                    "$ref": "#/components/schemas/DeliveryConfig"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscriber created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscriber"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Subscribers (V1)"
+        ],
+        "summary": "List all subscribers",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter active only (true/false)"
+            },
+            "required": false,
+            "name": "active",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subscribers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subscriber"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subscribers/events": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "List recent webhook events",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Max results (default 50, max 200)"
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter by repository (owner/repo)"
+            },
+            "required": false,
+            "name": "repository",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recent events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookEvent"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subscribers/events/{id}/deliveries": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "List deliveries for an event",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Event internal ID"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deliveries for the event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Delivery"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subscribers/events/{id}/replay": {
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Replay a stored event",
+        "description": "Re-dispatch a stored event to matching subscribers (or a specific subscriber)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subscriber_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Replay to a specific subscriber only"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event replayed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subscribers/{id}": {
+      "get": {
+        "tags": [
+          "Subscribers (V1)"
+        ],
+        "summary": "Get subscriber details with delivery stats",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriberWithStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Subscribers (V1)"
+        ],
+        "summary": "Update subscriber",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "secret": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "filters": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "delivery_config": {
+                    "$ref": "#/components/schemas/DeliveryConfig"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscriber updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscriber"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Subscribers (V1)"
+        ],
+        "summary": "Deactivate or delete subscriber",
+        "description": "Soft-deactivate by default. Use ?hard=true to permanently delete.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Set to \"true\" to permanently delete"
+            },
+            "required": false,
+            "name": "hard",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Subscriber removed"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subscribers/{id}/test": {
+      "post": {
+        "tags": [
+          "Subscribers (V1)"
+        ],
+        "summary": "Send test ping to subscriber",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Test result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestPingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No URL configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/subscribers": {
+      "post": {
+        "tags": [
+          "Subscribers (V2)"
+        ],
+        "summary": "Register a V2 subscriber with advanced filtering",
+        "description": "Create a subscriber with compound event.action subscriptions, include/exclude glob filters, payload conditions, and optional event batching.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "example": "my-smart-agent"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://your-agent.example.com/webhook"
+                  },
+                  "secret": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 255,
+                    "example": "a-strong-shared-secret"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "example": [
+                      "pull_request.opened",
+                      "pull_request.closed",
+                      "push"
+                    ]
+                  },
+                  "filters": {
+                    "$ref": "#/components/schemas/V2Filters"
+                  },
+                  "delivery_config": {
+                    "$ref": "#/components/schemas/DeliveryConfig"
+                  },
+                  "batching": {
+                    "$ref": "#/components/schemas/BatchingConfig"
+                  }
+                },
+                "required": [
+                  "name",
+                  "events"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "V2 subscriber created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscriber"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Subscribers (V2)"
+        ],
+        "summary": "List all subscribers with filter version annotation",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter active only"
+            },
+            "required": false,
+            "name": "active",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Annotated subscriber list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subscriber"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/subscribers/filters/help": {
+      "get": {
+        "tags": [
+          "Subscribers (V2)"
+        ],
+        "summary": "Get V2 filter documentation and examples",
+        "description": "Returns comprehensive documentation of all available V2 filter options with examples and common configurations.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filter documentation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterHelp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/subscribers/events": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "List recent webhook events (V2)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "repository",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recent events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookEvent"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/subscribers/events/{id}/deliveries": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "List deliveries for event (V2)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deliveries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Delivery"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/subscribers/events/{id}/replay": {
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Replay event (V2)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subscriber_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event replayed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/subscribers/{id}": {
+      "get": {
+        "tags": [
+          "Subscribers (V2)"
+        ],
+        "summary": "Get V2 subscriber details with stats",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriberWithStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Subscribers (V2)"
+        ],
+        "summary": "Update V2 subscriber",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "secret": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "filters": {
+                    "$ref": "#/components/schemas/V2Filters"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "delivery_config": {
+                    "$ref": "#/components/schemas/DeliveryConfig"
+                  },
+                  "batching": {
+                    "$ref": "#/components/schemas/BatchingConfig"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscriber"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Subscribers (V2)"
+        ],
+        "summary": "Deactivate or delete V2 subscriber",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "hard",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Subscriber removed"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/subscribers/{id}/test": {
+      "post": {
+        "tags": [
+          "Subscribers (V2)"
+        ],
+        "summary": "Send test ping to V2 subscriber",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Test result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestPingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No URL configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/github": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Receive GitHub webhook events",
+        "description": "Main GitHub webhook receiver. Verifies X-Hub-Signature-256, persists events, routes through handlers, and dispatches to subscribers. Rate limited to 120 req/min.",
+        "security": [
+          {
+            "WebhookSignature": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "GitHub webhook payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "received": {
+                      "type": "boolean"
+                    },
+                    "eventId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "received",
+                    "eventId"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid signature"
+          },
+          "429": {
+            "description": "Rate limited (120 req/min)"
+          }
+        }
+      }
+    },
+    "/webhooks/status": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Get connector operational status",
+        "description": "Returns event/delivery stats, subscriber count, WebSocket client count, and uptime.",
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/stats": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get dashboard statistics",
+        "description": "Aggregated stats for the dashboard: event/delivery counts, subscribers, WebSocket clients, repo breakdown.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/stats/timeseries": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get time-series event statistics",
+        "description": "Returns event counts bucketed by hour over a time period. Used for dashboard charts.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1h",
+                "6h",
+                "24h",
+                "7d",
+                "30d"
+              ],
+              "description": "Time period to query (default: 24h)",
+              "example": "24h"
+            },
+            "required": false,
+            "name": "period",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter by repository"
+            },
+            "required": false,
+            "name": "repository",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series buckets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "period": {
+                      "type": "string"
+                    },
+                    "bucket_size": {
+                      "type": "string"
+                    },
+                    "buckets": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TimeSeriesBucket"
+                      }
+                    }
+                  },
+                  "required": [
+                    "period",
+                    "bucket_size",
+                    "buckets"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{id}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Get event details with deliveries",
+        "description": "Returns full event data including payload, headers, and all delivery attempts.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event with deliveries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "event": {
+                      "$ref": "#/components/schemas/WebhookEvent"
+                    },
+                    "deliveries": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Delivery"
+                      }
+                    }
+                  },
+                  "required": [
+                    "event",
+                    "deliveries"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "System health check",
+        "description": "Comprehensive health check of all system components (PostgreSQL, Redis, BullMQ). Returns 503 if unhealthy.",
+        "responses": {
+          "200": {
+            "description": "Healthy or degraded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Unhealthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Prometheus metrics",
+        "description": "Exposes Prometheus-compatible metrics for monitoring (event counts, delivery latencies, queue depths).",
+        "responses": {
+          "200": {
+            "description": "Prometheus metrics",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

@@ -1,0 +1,18 @@
+@@ -264,7 +264,7 @@
+     /**
+      * Auto-paginate through all events
+      */
+-    listAll: async function* (params?: EventListParams): AsyncGenerator<WebhookEvent[]> {
++    listAll: (async function* (this: AlteriomWebhookClient, params?: EventListParams): AsyncGenerator<WebhookEvent[]> {
+       let page = 1;
+       let hasMore = true;
+ 
+@@ -274,7 +274,7 @@
+         hasMore = response.hasMore;
+         page++;
+       }
+-    }.bind(this),
++    }).bind(this),
+   };
+ 
+   /**

@@ -1,0 +1,54 @@
+{
+  "name": "@alteriom/webhook-client",
+  "version": "0.0.1",
+  "description": "Type-safe TypeScript client for Alteriom Webhook Connector",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "webhook",
+    "alteriom",
+    "github",
+    "typescript",
+    "api-client",
+    "openclaw"
+  ],
+  "author": "Alteriom",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alteriom/webhook-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Alteriom/webhook-client/issues"
+  },
+  "homepage": "https://github.com/Alteriom/webhook-client#readme",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^9.18.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
