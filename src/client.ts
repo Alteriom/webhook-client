@@ -239,7 +239,7 @@ export class AlteriomWebhookClient {
     list: async (params?: EventListParams): Promise<PaginatedResponse<WebhookEvent>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/v1/events', { params });
+        const { data } = await this.http.get('/api/events', { params });
         return {
           data: data.events,
           total: data.total,
@@ -256,7 +256,7 @@ export class AlteriomWebhookClient {
     get: async (id: string): Promise<WebhookEvent> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get(`/api/v1/events/${id}`);
+        const { data } = await this.http.get(`/api/events/${id}`);
         return data;
       });
     },
@@ -272,7 +272,7 @@ export class AlteriomWebhookClient {
     list: async (params?: { page?: number; limit?: number }): Promise<PaginatedResponse<EventAggregate>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/v1/aggregates', { params });
+        const { data } = await this.http.get('/api/aggregates', { params });
         return {
           data: data.aggregates,
           total: data.total,
@@ -289,7 +289,7 @@ export class AlteriomWebhookClient {
     get: async (id: string): Promise<EventAggregate> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get(`/api/v1/aggregates/${id}`);
+        const { data } = await this.http.get(`/api/aggregates/${id}`);
         return data;
       });
     },
@@ -305,7 +305,7 @@ export class AlteriomWebhookClient {
     enrich: async (aggregateId: string): Promise<Enrichment> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data} = await this.http.post(`/api/v1/aggregates/${aggregateId}/enrich`);
+        const { data} = await this.http.post(`/api/aggregates/${aggregateId}/enrich`);
         return data;
       });
     },
@@ -321,7 +321,7 @@ export class AlteriomWebhookClient {
     list: async (params?: { page?: number; limit?: number }): Promise<PaginatedResponse<Delivery>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/v1/deliveries', { params });
+        const { data } = await this.http.get('/api/deliveries', { params });
         return {
           data: data.deliveries,
           total: data.total,
