@@ -240,7 +240,7 @@ export class AlteriomWebhookClient {
     list: async (params?: EventListParams): Promise<PaginatedResponse<WebhookEvent>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/v1/events', { params });
+        const { data } = await this.http.get('/api/events', { params });
         return {
           data: data.events,
           total: data.total,
@@ -257,7 +257,7 @@ export class AlteriomWebhookClient {
     get: async (id: string): Promise<WebhookEvent> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get(`/api/v1/events/${id}`);
+        const { data } = await this.http.get(`/api/events/${id}`);
         return data;
       });
     },
@@ -273,7 +273,7 @@ export class AlteriomWebhookClient {
     list: async (params?: { page?: number; limit?: number }): Promise<PaginatedResponse<EventAggregate>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/v1/aggregates', { params });
+        const { data } = await this.http.get('/api/aggregates', { params });
         return {
           data: data.aggregates,
           total: data.total,
@@ -290,7 +290,7 @@ export class AlteriomWebhookClient {
     get: async (id: string): Promise<EventAggregate> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get(`/api/v1/aggregates/${id}`);
+        const { data } = await this.http.get(`/api/aggregates/${id}`);
         return data;
       });
     },
@@ -306,7 +306,7 @@ export class AlteriomWebhookClient {
     enrich: async (aggregateId: string): Promise<Enrichment> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data} = await this.http.post(`/api/v1/aggregates/${aggregateId}/enrich`);
+        const { data} = await this.http.post(`/api/aggregates/${aggregateId}/enrich`);
         return data;
       });
     },
@@ -322,7 +322,7 @@ export class AlteriomWebhookClient {
     list: async (params?: { page?: number; limit?: number }): Promise<PaginatedResponse<Delivery>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/v1/deliveries', { params });
+        const { data } = await this.http.get('/api/deliveries', { params });
         return {
           data: data.deliveries,
           total: data.total,
@@ -344,7 +344,7 @@ export class AlteriomWebhookClient {
     list: async (): Promise<Subscriber[]> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/v1/subscribers');
+        const { data } = await this.http.get('/api/subscribers');
         return data;
       });
     },
@@ -355,7 +355,7 @@ export class AlteriomWebhookClient {
     create: async (request: CreateSubscriberRequest): Promise<Subscriber> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.post('/api/v1/subscribers', request);
+        const { data } = await this.http.post('/api/subscribers', request);
         return data;
       });
     },
@@ -366,7 +366,7 @@ export class AlteriomWebhookClient {
     update: async (id: string, request: UpdateSubscriberRequest): Promise<Subscriber> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.put(`/api/v1/subscribers/${id}`, request);
+        const { data } = await this.http.put(`/api/subscribers/${id}`, request);
         return data;
       });
     },
@@ -377,7 +377,7 @@ export class AlteriomWebhookClient {
     delete: async (id: string): Promise<void> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        await this.http.delete(`/api/v1/subscribers/${id}`);
+        await this.http.delete(`/api/subscribers/${id}`);
       });
     },
   };
