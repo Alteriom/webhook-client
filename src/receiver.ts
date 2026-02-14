@@ -5,7 +5,6 @@
 
 import * as crypto from 'crypto';
 import type { SubscriptionDelivery } from './types';
-import { SignatureVerificationError, WebhookExpiredError } from './errors';
 
 /**
  * Receiver configuration
