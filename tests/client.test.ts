@@ -10,7 +10,7 @@ import { AlteriomWebhookClient } from '../src/client';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-describe('AlteriomWebhookClient - Versioned Endpoints', () => {
+describe('AlteriomWebhookClient - API Endpoints', () => {
   let client: AlteriomWebhookClient;
   let mockAxiosInstance: any;
 
@@ -66,8 +66,8 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
     });
   });
 
-  describe('Events API - /api/v1/events', () => {
-    it('should call /api/v1/events for list', async () => {
+  describe('Events API - /api/events', () => {
+    it('should call /api/events for list', async () => {
       mockAxiosInstance.get.mockResolvedValue({
         data: { events: [], total: 0 },
       });
@@ -75,19 +75,19 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
       await client.events.list();
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        '/api/v1/events',
+        '/api/events',
         expect.any(Object)
       );
     });
 
-    it('should call /api/v1/events/{id} for get', async () => {
+    it('should call /api/events/{id} for get', async () => {
       mockAxiosInstance.get.mockResolvedValue({
         data: { id: 'event-123' },
       });
 
       await client.events.get('event-123');
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/events/event-123');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/events/event-123');
     });
 
     it('should pass query parameters to list endpoint', async () => {
@@ -101,7 +101,7 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
         event_type: 'pull_request',
       });
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/events', {
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/events', {
         params: {
           page: 2,
           limit: 25,
@@ -111,8 +111,8 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
     });
   });
 
-  describe('Aggregates API - /api/v1/aggregates', () => {
-    it('should call /api/v1/aggregates for list', async () => {
+  describe('Aggregates API - /api/aggregates', () => {
+    it('should call /api/aggregates for list', async () => {
       mockAxiosInstance.get.mockResolvedValue({
         data: { aggregates: [], total: 0 },
       });
@@ -120,19 +120,19 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
       await client.aggregates.list();
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        '/api/v1/aggregates',
+        '/api/aggregates',
         expect.any(Object)
       );
     });
 
-    it('should call /api/v1/aggregates/{id} for get', async () => {
+    it('should call /api/aggregates/{id} for get', async () => {
       mockAxiosInstance.get.mockResolvedValue({
         data: { id: 'agg-123' },
       });
 
       await client.aggregates.get('agg-123');
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/aggregates/agg-123');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/aggregates/agg-123');
     });
 
     it('should pass pagination parameters to list endpoint', async () => {
@@ -142,14 +142,14 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
 
       await client.aggregates.list({ page: 3, limit: 10 });
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/aggregates', {
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/aggregates', {
         params: { page: 3, limit: 10 },
       });
     });
   });
 
-  describe('Enrichment API - /api/v1/aggregates/{id}/enrich', () => {
-    it('should call /api/v1/aggregates/{id}/enrich for enrich', async () => {
+  describe('Enrichment API - /api/aggregates/{id}/enrich', () => {
+    it('should call /api/aggregates/{id}/enrich for enrich', async () => {
       mockAxiosInstance.post.mockResolvedValue({
         data: { aggregate_id: 'agg-123' },
       });
@@ -157,13 +157,13 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
       await client.enrichment.enrich('agg-123');
 
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-        '/api/v1/aggregates/agg-123/enrich'
+        '/api/aggregates/agg-123/enrich'
       );
     });
   });
 
-  describe('Deliveries API - /api/v1/deliveries', () => {
-    it('should call /api/v1/deliveries for list', async () => {
+  describe('Deliveries API - /api/deliveries', () => {
+    it('should call /api/deliveries for list', async () => {
       mockAxiosInstance.get.mockResolvedValue({
         data: { deliveries: [], total: 0 },
       });
@@ -171,7 +171,7 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
       await client.deliveries.list();
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        '/api/v1/deliveries',
+        '/api/deliveries',
         expect.any(Object)
       );
     });
@@ -183,24 +183,24 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
 
       await client.deliveries.list({ page: 1, limit: 100 });
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/deliveries', {
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/deliveries', {
         params: { page: 1, limit: 100 },
       });
     });
   });
 
-  describe('Subscribers API - /api/v1/subscribers', () => {
-    it('should call /api/v1/subscribers for list', async () => {
+  describe('Subscribers API - /api/subscribers', () => {
+    it('should call /api/subscribers for list', async () => {
       mockAxiosInstance.get.mockResolvedValue({
         data: [],
       });
 
       await client.subscribers.list();
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/subscribers');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/subscribers');
     });
 
-    it('should call /api/v1/subscribers for create', async () => {
+    it('should call /api/subscribers for create', async () => {
       const request = {
         name: 'Test Subscriber',
         url: 'https://example.com/webhook',
@@ -215,12 +215,12 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
       await client.subscribers.create(request);
 
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-        '/api/v1/subscribers',
+        '/api/subscribers',
         request
       );
     });
 
-    it('should call /api/v1/subscribers/{id} for update', async () => {
+    it('should call /api/subscribers/{id} for update', async () => {
       const request = {
         url: 'https://example.com/new-webhook',
         events: ['push', 'pull_request'],
@@ -233,22 +233,22 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
       await client.subscribers.update('sub-123', request);
 
       expect(mockAxiosInstance.put).toHaveBeenCalledWith(
-        '/api/v1/subscribers/sub-123',
+        '/api/subscribers/sub-123',
         request
       );
     });
 
-    it('should call /api/v1/subscribers/{id} for delete', async () => {
+    it('should call /api/subscribers/{id} for delete', async () => {
       mockAxiosInstance.delete.mockResolvedValue({ data: null });
 
       await client.subscribers.delete('sub-123');
 
-      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/subscribers/sub-123');
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/subscribers/sub-123');
     });
   });
 
-  describe('Endpoint Version Verification', () => {
-    it('should never call endpoints without v1 prefix', async () => {
+  describe('Endpoint Path Verification', () => {
+    it('should call endpoints with /api/ prefix (no version)', async () => {
       // Mock proper response structures
       mockAxiosInstance.get.mockImplementation((url: string) => {
         if (url.includes('/events')) {
@@ -289,7 +289,7 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
       const putCalls = mockAxiosInstance.put.mock.calls;
       const deleteCalls = mockAxiosInstance.delete.mock.calls;
 
-      // Verify all calls use /api/v1/ prefix
+      // Verify all calls use /api/ prefix (without version)
       const allCalls = [
         ...getCalls.map((call: any) => call[0]),
         ...postCalls.map((call: any) => call[0]),
@@ -297,14 +297,14 @@ describe('AlteriomWebhookClient - Versioned Endpoints', () => {
         ...deleteCalls.map((call: any) => call[0]),
       ];
 
-      // All should start with /api/v1/
+      // All should start with /api/
       allCalls.forEach((path) => {
-        expect(path).toMatch(/^\/api\/v1\//);
+        expect(path).toMatch(/^\/api\//);
       });
 
-      // None should be /api/ without version
+      // None should have version prefix
       allCalls.forEach((path) => {
-        expect(path).not.toMatch(/^\/api\/[^v]/);
+        expect(path).not.toMatch(/^\/api\/v\d+\//);
       });
     }, 10000); // Increase timeout to 10 seconds due to rate limiter
   });
