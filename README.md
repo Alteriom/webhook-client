@@ -113,6 +113,408 @@ const client = new AlteriomWebhookClient({
 });
 \`\`\`
 
+### Security Dashboard API (NEW in v0.1.0)
+
+Get a comprehensive view of security alerts across all repositories.
+
+\`\`\`typescript
+// Get remediation queue (top 20 critical/high alerts)
+const queue = await client.security.getRemediationQueue(20);
+queue.forEach(alert => {
+  console.log(`${alert.type} alert #${alert.alert_number} in ${alert.repository}`);
+  console.log(`Severity: ${alert.severity}, Age: ${alert.age_days} days`);
+  console.log(`URL: ${alert.html_url}`);
+});
+
+// Get repository risk levels
+const repos = await client.security.getRepositories();
+repos.forEach(repo => {
+  console.log(`${repo.repository}: ${repo.risk_level} (score: ${repo.risk_score})`);
+  console.log(`  Dependabot: ${repo.alert_counts.dependabot}`);
+  console.log(`  Code Scanning: ${repo.alert_counts.code_scanning}`);
+  console.log(`  Secret Scanning: ${repo.alert_counts.secret_scanning}`);
+});
+
+// Get overall security badge counts
+const badges = await client.security.getBadgeCounts();
+console.log('Dependabot:', badges.dependabot.total, 'open:', badges.dependabot.open);
+console.log('  Critical:', badges.dependabot.by_severity.critical);
+console.log('  High:', badges.dependabot.by_severity.high);
+\`\`\`
+
+### Dependabot Alerts API (NEW in v0.1.0)
+
+Monitor and manage Dependabot vulnerability alerts.
+
+\`\`\`typescript
+// List dependabot alerts with filters
+const alerts = await client.dependabotAlerts.list({
+  repository: 'Alteriom/webhook-connector',
+  state: 'open',
+  severity: 'critical',
+  ecosystem: 'npm',
+  limit: 50,
+  offset: 0,
+});
+
+console.log(`Found ${alerts.total} alerts`);
+alerts.data.forEach(alert => {
+  console.log(`${alert.dependency_package}@${alert.vulnerable_version_range}`);
+  console.log(`  ${alert.vulnerability_severity}: ${alert.vulnerability_summary}`);
+  console.log(`  GHSA: ${alert.vulnerability_ghsa_id}`);
+  if (alert.patched_version) {
+    console.log(`  Fix: upgrade to ${alert.patched_version}`);
+  }
+});
+
+// Get single alert details
+const alert = await client.dependabotAlerts.get('alert-uuid');
+
+// Get alert statistics
+const stats = await client.dependabotAlerts.stats('Alteriom/webhook-connector');
+console.log('Total:', stats.total);
+console.log('By state:', stats.by_state);
+console.log('By severity:', stats.by_severity);
+
+// Export alerts to CSV (max 10,000 records)
+const csv = await client.dependabotAlerts.export({
+  state: 'open',
+  severity: 'high,critical',
+});
+// Write CSV to file or send to user
+\`\`\`
+
+### Code Scanning Alerts API (NEW in v0.1.0)
+
+Manage code scanning security alerts (CodeQL, etc.).
+
+\`\`\`typescript
+// List code scanning alerts
+const alerts = await client.codeScanningAlerts.list({
+  repository: 'Alteriom/webhook-connector',
+  state: 'open',
+  severity: 'error',
+  limit: 50,
+});
+
+alerts.data.forEach(alert => {
+  console.log(`${alert.rule_id}: ${alert.rule_description}`);
+  console.log(`  Tool: ${alert.tool_name} ${alert.tool_version}`);
+  console.log(`  Instances: ${alert.instances_count}`);
+});
+
+// Get statistics
+const stats = await client.codeScanningAlerts.stats();
+
+// Export to CSV
+const csv = await client.codeScanningAlerts.export({ state: 'open' });
+\`\`\`
+
+### Secret Scanning Alerts API (NEW in v0.1.0)
+
+Monitor exposed secrets in code.
+
+\`\`\`typescript
+// List secret scanning alerts
+const alerts = await client.secretScanningAlerts.list({
+  repository: 'Alteriom/webhook-connector',
+  state: 'open',
+});
+
+alerts.data.forEach(alert => {
+  console.log(`${alert.secret_type_display_name}`);
+  console.log(`  Locations: ${alert.locations_count}`);
+  console.log(`  Push protection bypassed: ${alert.push_protection_bypassed}`);
+});
+
+// Get statistics
+const stats = await client.secretScanningAlerts.stats();
+
+// Export to CSV
+const csv = await client.secretScanningAlerts.export({ state: 'open' });
+\`\`\`
+
+### Security Advisories API (NEW in v0.1.0)
+
+Manage GitHub Security Advisories and triage them.
+
+\`\`\`typescript
+// List security advisories
+const advisories = await client.securityAdvisories.list({
+  severity: 'critical',
+  limit: 50,
+});
+
+advisories.data.forEach(advisory => {
+  console.log(`${advisory.ghsa_id}: ${advisory.summary}`);
+  console.log(`  Severity: ${advisory.severity} (CVSS: ${advisory.cvss_score})`);
+  console.log(`  Affected repos: ${advisory.affected_repositories.length}`);
+  console.log(`  Triage status: ${advisory.triage_status}`);
+});
+
+// Get single advisory
+const advisory = await client.securityAdvisories.get('advisory-uuid');
+
+// Triage advisory (mark as not applicable or resolved)
+await client.securityAdvisories.triage('advisory-uuid', {
+  status: 'not_applicable',
+  reason: 'Package not used in production',
+  notes: 'Only dev dependency, not exposed',
+});
+
+// Get statistics
+const stats = await client.securityAdvisories.stats();
+\`\`\`
+
+### Repositories API (NEW in v0.1.0)
+
+Manage repository monitoring settings.
+
+\`\`\`typescript
+// List all repositories
+const repos = await client.repositories.list();
+
+// List only monitored repositories
+const monitored = await client.repositories.list({ scan_enabled: true });
+
+// Get repository details
+const repo = await client.repositories.get('Alteriom', 'webhook-connector');
+console.log('Scan enabled:', repo.scan_enabled);
+console.log('Language:', repo.language);
+console.log('Topics:', repo.topics);
+
+// Enable security scanning for repository
+await client.repositories.update('Alteriom', 'webhook-connector', {
+  scan_enabled: true,
+});
+
+// Disable security scanning
+await client.repositories.update('Alteriom', 'old-repo', {
+  scan_enabled: false,
+});
+
+// Remove repository from system
+await client.repositories.delete('Alteriom', 'archived-repo');
+\`\`\`
+
+### HTTP Subscribers API (NEW in v0.1.0)
+
+Manage HTTP webhook subscribers.
+
+\`\`\`typescript
+// List HTTP subscribers
+const subscribers = await client.httpSubscribers.list();
+subscribers.forEach(sub => {
+  console.log(`${sub.name}: ${sub.url}`);
+  console.log(`  Events: ${sub.events.join(', ')}`);
+  console.log(`  Stats: ${sub.delivery_stats.successful_deliveries}/${sub.delivery_stats.total_deliveries} successful`);
+});
+
+// Create HTTP subscriber
+const subscriber = await client.httpSubscribers.create({
+  name: 'Production Webhook',
+  url: 'https://api.example.com/webhooks',
+  secret: 'my-webhook-secret',
+  events: ['dependabot_alert', 'code_scanning_alert'],
+  filters: {
+    repositories: ['Alteriom/*'],
+    severity: ['critical', 'high'],
+  },
+});
+
+// Update subscriber
+await client.httpSubscribers.update(subscriber.id, {
+  enabled: false,
+});
+
+// Test webhook delivery
+const result = await client.httpSubscribers.test(subscriber.id);
+if (result.success) {
+  console.log(`Test successful: ${result.status_code} in ${result.latency_ms}ms`);
+} else {
+  console.error(`Test failed: ${result.error}`);
+}
+
+// Delete subscriber
+await client.httpSubscribers.delete(subscriber.id);
+\`\`\`
+
+### API Keys API (NEW in v0.1.0)
+
+Manage API keys with auto-rotation support.
+
+\`\`\`typescript
+// List API keys
+const keys = await client.apiKeys.list();
+keys.forEach(key => {
+  console.log(`${key.name} (${key.key_prefix}...)`);
+  console.log(`  Scopes: ${key.scopes.join(', ')}`);
+  console.log(`  Last used: ${key.last_used_at || 'never'}`);
+  console.log(`  Auto-rotate: ${key.auto_rotate} (every ${key.rotation_days} days)`);
+});
+
+// Create API key with auto-rotation
+const { key, secret } = await client.apiKeys.create({
+  name: 'Production Key',
+  description: 'Main production API key',
+  scopes: ['read', 'write'],
+  expires_at: '2027-03-05T00:00:00Z', // Optional expiration
+  auto_rotate: true,
+  rotation_days: 90, // Rotate every 90 days
+});
+
+console.log('New API key:', secret); // Save this securely!
+
+// Update key settings
+await client.apiKeys.update(key.id, {
+  description: 'Updated description',
+  auto_rotate: false,
+});
+
+// Manually rotate key
+const result = await client.apiKeys.rotate(key.id);
+console.log('New key:', result.new_key);
+console.log('Expires at:', result.expires_at);
+
+// Deactivate key
+await client.apiKeys.update(key.id, { active: false });
+
+// Delete key
+await client.apiKeys.delete(key.id);
+\`\`\`
+
+### Audit Logs API (NEW in v0.1.0)
+
+Track all API key usage and configuration changes.
+
+\`\`\`typescript
+// List audit events
+const logs = await client.audit.list({ limit: 50, offset: 0 });
+logs.data.forEach(event => {
+  console.log(`[${event.created_at}] ${event.actor} ${event.action} ${event.resource_type}`);
+  console.log(`  Details:`, event.details);
+});
+
+// Get single audit event
+const event = await client.audit.get('event-uuid');
+\`\`\`
+
+### Health API (NEW in v0.1.0)
+
+Monitor system health and configuration.
+
+\`\`\`typescript
+// Get system health status
+const health = await client.health.status();
+console.log('Status:', health.status); // healthy | degraded | unhealthy
+console.log('Uptime:', health.uptime_seconds, 'seconds');
+console.log('Checks:', health.checks);
+
+// Get handler configurations
+const handlers = await client.health.handlers();
+handlers.forEach(handler => {
+  console.log(`${handler.event_type}: ${handler.handler_name} (priority: ${handler.priority})`);
+});
+
+// Get pending events summary
+const pending = await client.health.pendingEvents();
+console.log('Total pending:', pending.total);
+console.log('By status:', pending.by_status);
+console.log('Oldest pending:', pending.oldest_pending_at);
+\`\`\`
+
+### Dashboard API (NEW in v0.1.0)
+
+Get dashboard metrics and time-series data.
+
+\`\`\`typescript
+// Get dashboard statistics
+const stats = await client.dashboard.stats();
+console.log('Total events:', stats.total_events);
+console.log('Total deliveries:', stats.total_deliveries);
+console.log('Active subscribers:', stats.active_subscribers);
+console.log('Delivery success rate:', stats.delivery_success_rate * 100, '%');
+console.log('Avg latency:', stats.avg_latency_ms, 'ms');
+
+// Top repositories
+stats.top_repositories.forEach(repo => {
+  console.log(`${repo.repository}: ${repo.event_count} events`);
+});
+
+// Get time-series data
+const timeseries = await client.dashboard.timeSeries('events', '1h');
+timeseries.forEach(point => {
+  console.log(`${point.timestamp}: ${point.value}`);
+});
+\`\`\`
+
+### Pipelines API (NEW in v0.1.0)
+
+Monitor CI/CD pipeline statuses.
+
+\`\`\`typescript
+// List all pipeline statuses
+const pipelines = await client.pipelines.list();
+
+// List pipelines for specific repository
+const repoPipelines = await client.pipelines.list('Alteriom/webhook-connector');
+
+repoPipelines.forEach(pipeline => {
+  console.log(`${pipeline.workflow_name} #${pipeline.run_number}: ${pipeline.status}`);
+  console.log(`  Branch: ${pipeline.branch}`);
+  console.log(`  Commit: ${pipeline.commit_sha.slice(0, 7)} - ${pipeline.commit_message}`);
+  console.log(`  Duration: ${pipeline.duration_seconds}s`);
+});
+
+// Get pipelines for owner/repo
+const specific = await client.pipelines.get('Alteriom', 'webhook-connector');
+\`\`\`
+
+### Query Logs API (NEW in v0.1.0)
+
+Track API usage and query logs.
+
+\`\`\`typescript
+// List query logs
+const logs = await client.queryLogs.list({ limit: 50, offset: 0 });
+logs.data.forEach(log => {
+  console.log(`[${log.created_at}] ${log.method} ${log.endpoint}`);
+  console.log(`  API Key: ${log.api_key_name}`);
+  console.log(`  Response: ${log.response_code} (${log.latency_ms}ms)`);
+  console.log(`  Results: ${log.result_count}`);
+});
+\`\`\`
+
+### Agent Subscriptions API (NEW in v0.1.0)
+
+Manage agent event subscriptions.
+
+\`\`\`typescript
+// List agent subscriptions
+const subscriptions = await client.subscriptions.list();
+subscriptions.forEach(sub => {
+  console.log(`${sub.agent_name} (${sub.agent_id})`);
+  console.log(`  Events: ${sub.events.join(', ')}`);
+  console.log(`  Delivery: ${sub.delivery_mode}`);
+});
+
+// Create agent subscription
+const subscription = await client.subscriptions.create({
+  agent_id: 'jarvis',
+  agent_name: 'Jarvis AI Agent',
+  events: ['workflow_run', 'deployment'],
+  filters: {
+    repositories: ['North-Relay/*'],
+    conclusion: ['success', 'failure'],
+  },
+  delivery_mode: 'push',
+  delivery_url: 'https://jarvis.example.com/webhook',
+});
+
+// Delete subscription
+await client.subscriptions.delete(subscription.id);
+\`\`\`
+
 ### Events API
 
 \`\`\`typescript
@@ -139,12 +541,9 @@ const event = await client.events.get('event-uuid');
 // List aggregates
 const aggregates = await client.aggregates.list({ page: 1, limit: 50 });
 
-// Get aggregate with enrichment
-const aggregate = await client.aggregates.get('aggregate-uuid');
-if (aggregate.enrichment) {
-  console.log('Risk level:', aggregate.enrichment.risk_level);
-  console.log('Complexity:', aggregate.enrichment.complexity);
-}
+// Note: aggregates.get(id) removed in v0.1.0 - endpoint doesn't exist
+// Use list and filter instead
+const aggregate = aggregates.data.find(a => a.entity_id === 'some-id');
 \`\`\`
 
 ### Enrichment API
@@ -158,6 +557,16 @@ console.log('Risk:', enrichment.risk_level);
 console.log('Security concerns:', enrichment.security_concerns);
 console.log('Suggested actions:', enrichment.suggested_actions);
 console.log('Cost:', `$${enrichment.cost_usd?.toFixed(4)}`);
+\`\`\`
+
+### Deliveries API
+
+\`\`\`typescript
+// List deliveries
+const deliveries = await client.deliveries.list({ limit: 50 });
+
+// Get delivery statistics
+const stats = await client.deliveries.stats();
 \`\`\`
 
 ### Subscribers API

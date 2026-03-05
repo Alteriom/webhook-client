@@ -59,7 +59,7 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
       expect(mockedAxios.create).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-Client-Version': '0.0.1',
+            'X-Client-Version': '0.1.0',
           }),
         })
       );
@@ -111,44 +111,37 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
     });
   });
 
-  describe('Aggregates API - /api/aggregates', () => {
-    it('should call /api/aggregates for list', async () => {
+  describe('Aggregates API - /api/v1/aggregates', () => {
+    it('should call /api/v1/aggregates for list', async () => {
       mockAxiosInstance.get.mockResolvedValue({
-        data: { aggregates: [], total: 0 },
+        data: { data: [], pagination: { total: 0 } },
       });
 
       await client.aggregates.list();
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        '/api/aggregates',
+        '/api/v1/aggregates',
         expect.any(Object)
       );
     });
 
-    it('should call /api/aggregates/{id} for get', async () => {
-      mockAxiosInstance.get.mockResolvedValue({
-        data: { id: 'agg-123' },
-      });
-
-      await client.aggregates.get('agg-123');
-
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/aggregates/agg-123');
-    });
+    // NOTE: aggregates.get(id) removed in v0.1.0 - endpoint doesn't exist on server
+    // Use list() and filter instead
 
     it('should pass pagination parameters to list endpoint', async () => {
       mockAxiosInstance.get.mockResolvedValue({
-        data: { aggregates: [], total: 0 },
+        data: { data: [], pagination: { total: 0 } },
       });
 
       await client.aggregates.list({ page: 3, limit: 10 });
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/aggregates', {
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/aggregates', {
         params: { page: 3, limit: 10 },
       });
     });
   });
 
-  describe('Enrichment API - /api/aggregates/{id}/enrich', () => {
+  describe('Enrichment API - /api/v1/enrichment', () => {
     it('should call /api/aggregates/{id}/enrich for enrich', async () => {
       mockAxiosInstance.post.mockResolvedValue({
         data: { aggregate_id: 'agg-123' },
@@ -157,13 +150,14 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
       await client.enrichment.enrich('agg-123');
 
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-        '/api/aggregates/agg-123/enrich'
+        '/api/v1/enrichment/enrich',
+        { aggregate_id: 'agg-123' }
       );
     });
   });
 
-  describe('Deliveries API - /api/deliveries', () => {
-    it('should call /api/deliveries for list', async () => {
+  describe('Deliveries API - /api/v1/deliveries', () => {
+    it('should call /api/v1/deliveries/all for list', async () => {
       mockAxiosInstance.get.mockResolvedValue({
         data: { deliveries: [], total: 0 },
       });
@@ -171,7 +165,7 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
       await client.deliveries.list();
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        '/api/deliveries',
+        '/api/v1/deliveries/all',
         expect.any(Object)
       );
     });
@@ -183,7 +177,7 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
 
       await client.deliveries.list({ page: 1, limit: 100 });
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/deliveries', {
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/deliveries/all', {
         params: { page: 1, limit: 100 },
       });
     });
@@ -254,9 +248,9 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
         if (url.includes('/events')) {
           return Promise.resolve({ data: { events: [], total: 0 } });
         } else if (url.includes('/aggregates')) {
-          return Promise.resolve({ data: { aggregates: [], total: 0 } });
+          return Promise.resolve({ data: { data: [], pagination: { total: 0 } } });
         } else if (url.includes('/deliveries')) {
-          return Promise.resolve({ data: { deliveries: [], total: 0 } });
+          return Promise.resolve({ data: { deliveries: [], data: [], total: 0 } });
         } else if (url.includes('/subscribers')) {
           return Promise.resolve({ data: [] });
         }
@@ -270,7 +264,7 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
       await client.events.list();
       await client.events.get('id');
       await client.aggregates.list();
-      await client.aggregates.get('id');
+      // NOTE: aggregates.get(id) removed in v0.1.0
       await client.enrichment.enrich('id');
       await client.deliveries.list();
       await client.subscribers.list();
@@ -302,10 +296,9 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
         expect(path).toMatch(/^\/api\//);
       });
 
-      // None should have version prefix
-      allCalls.forEach((path) => {
-        expect(path).not.toMatch(/^\/api\/v\d+\//);
-      });
+      // v0.1.0 uses /api/v1/* for most endpoints (breaking change from v0.0.1)
+      // Events and subscribers still use /api/* (no version)
+      // This is expected and correct behavior
     }, 10000); // Increase timeout to 10 seconds due to rate limiter
   });
 });

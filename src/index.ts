@@ -15,6 +15,7 @@ export * from './errors';
 
 // Re-export commonly used types for convenience
 export type {
+  // Core types
   WebhookEvent,
   EventAggregate,
   Enrichment,
@@ -24,6 +25,47 @@ export type {
   ApiError as IApiError,
   ValidationError as IValidationError,
   RateLimitError as IRateLimitError,
+  // Security types
+  DependabotAlert,
+  CodeScanningAlert,
+  SecretScanningAlert,
+  SecurityAdvisory,
+  SecurityVulnerability,
+  RemediationQueueItem,
+  RepositoryRiskLevel,
+  BadgeCounts,
+  AlertStats,
+  SecurityAlertFilters,
+  TriageRequest,
+  // Repository types
+  Repository,
+  RepositoryUpdateRequest,
+  // HTTP Subscriber types
+  HttpSubscriber,
+  HttpSubscriberCreateRequest,
+  HttpSubscriberUpdateRequest,
+  HttpSubscriberTestResult,
+  // API Key types
+  ApiKey,
+  ApiKeyCreateRequest,
+  ApiKeyUpdateRequest,
+  ApiKeyRotationResult,
+  // Audit types
+  AuditEvent,
+  // Health types
+  HealthStatus,
+  HandlerConfig,
+  PendingEvents,
+  // Dashboard types
+  DashboardStats,
+  TimeSeriesPoint,
+  // Pipeline types
+  PipelineStatus,
+  // Query Log types
+  QueryLog,
+  // Subscription types
+  AgentSubscription,
+  AgentSubscriptionCreateRequest,
 } from './types';
 
 // Re-export error classes
