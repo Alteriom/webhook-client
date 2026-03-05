@@ -1,19 +1,61 @@
 /**
  * REST API client for Alteriom Webhook Connector
  * @module client
+ * @version 0.1.0
  */
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import type {
+  // Core types
   WebhookEvent,
   EventAggregate,
   Enrichment,
   Delivery,
   Subscriber,
+  PaginatedResponse,
   EventListParams,
   CreateSubscriberRequest,
   UpdateSubscriberRequest,
-  PaginatedResponse,
+  // Security types
+  DependabotAlert,
+  CodeScanningAlert,
+  SecretScanningAlert,
+  SecurityAdvisory,
+  RemediationQueueItem,
+  RepositoryRiskLevel,
+  BadgeCounts,
+  AlertStats,
+  SecurityAlertFilters,
+  TriageRequest,
+  // Repository types
+  Repository,
+  RepositoryUpdateRequest,
+  // HTTP Subscriber types
+  HttpSubscriber,
+  HttpSubscriberCreateRequest,
+  HttpSubscriberUpdateRequest,
+  HttpSubscriberTestResult,
+  // API Key types
+  ApiKey,
+  ApiKeyCreateRequest,
+  ApiKeyUpdateRequest,
+  ApiKeyRotationResult,
+  // Audit types
+  AuditEvent,
+  // Health types
+  HealthStatus,
+  HandlerConfig,
+  PendingEvents,
+  // Dashboard types
+  DashboardStats,
+  TimeSeriesPoint,
+  // Pipeline types
+  PipelineStatus,
+  // Query Log types
+  QueryLog,
+  // Subscription types
+  AgentSubscription,
+  AgentSubscriptionCreateRequest,
 } from './types';
 import { ApiError, RateLimitError } from './errors';
 
@@ -178,7 +220,7 @@ export class AlteriomWebhookClient {
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
         'Content-Type': 'application/json',
-        'X-Client-Version': '0.0.1',
+        'X-Client-Version': '0.1.0',
         'X-API-Version': '1.0',
       },
     });
@@ -273,25 +315,14 @@ export class AlteriomWebhookClient {
     list: async (params?: { page?: number; limit?: number }): Promise<PaginatedResponse<EventAggregate>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/aggregates', { params });
+        const { data } = await this.http.get('/api/v1/aggregates', { params });
         return {
-          data: data.aggregates,
-          total: data.total,
+          data: data.data,
+          total: data.pagination?.total || data.data.length,
           page: params?.page ?? 1,
           limit: params?.limit ?? 50,
-          hasMore: data.aggregates.length === (params?.limit ?? 50),
+          hasMore: data.data.length === (params?.limit ?? 50),
         };
-      });
-    },
-
-    /**
-     * Get aggregate by ID
-     */
-    get: async (id: string): Promise<EventAggregate> => {
-      await this.rateLimiter.acquire();
-      return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get(`/api/aggregates/${id}`);
-        return data;
       });
     },
   };
@@ -306,7 +337,7 @@ export class AlteriomWebhookClient {
     enrich: async (aggregateId: string): Promise<Enrichment> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data} = await this.http.post(`/api/aggregates/${aggregateId}/enrich`);
+        const { data } = await this.http.post('/api/v1/enrichment/enrich', { aggregate_id: aggregateId });
         return data;
       });
     },
@@ -322,14 +353,25 @@ export class AlteriomWebhookClient {
     list: async (params?: { page?: number; limit?: number }): Promise<PaginatedResponse<Delivery>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
-        const { data } = await this.http.get('/api/deliveries', { params });
+        const { data } = await this.http.get('/api/v1/deliveries/all', { params });
         return {
-          data: data.deliveries,
-          total: data.total,
+          data: data.deliveries || data.data,
+          total: data.total || data.pagination?.total || 0,
           page: params?.page ?? 1,
           limit: params?.limit ?? 50,
-          hasMore: data.deliveries.length === (params?.limit ?? 50),
+          hasMore: (data.deliveries || data.data).length === (params?.limit ?? 50),
         };
+      });
+    },
+
+    /**
+     * Get delivery statistics
+     */
+    stats: async (): Promise<Record<string, unknown>> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/deliveries/stats');
+        return data;
       });
     },
   };
@@ -378,6 +420,625 @@ export class AlteriomWebhookClient {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
         await this.http.delete(`/api/subscribers/${id}`);
+      });
+    },
+  };
+
+  /**
+   * Security Dashboard API
+   */
+  public readonly security = {
+    /**
+     * Get remediation queue (top critical/high priority alerts)
+     */
+    getRemediationQueue: async (limit: number = 20): Promise<RemediationQueueItem[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/security/remediation-queue', { params: { limit } });
+        return data.data || data;
+      });
+    },
+
+    /**
+     * Get repository risk levels
+     */
+    getRepositories: async (): Promise<RepositoryRiskLevel[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/security/repositories');
+        return data.data || data;
+      });
+    },
+
+    /**
+     * Get overall security badge counts
+     */
+    getBadgeCounts: async (): Promise<BadgeCounts> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/security/badge-counts');
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Dependabot Alerts API
+   */
+  public readonly dependabotAlerts = {
+    /**
+     * List dependabot alerts with filters
+     */
+    list: async (filters?: SecurityAlertFilters): Promise<PaginatedResponse<DependabotAlert>> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/dependabot-alerts', { params: filters });
+        return {
+          data: data.data,
+          total: data.pagination.total,
+          page: Math.floor((filters?.offset || 0) / (filters?.limit || 50)) + 1,
+          limit: filters?.limit || 50,
+          hasMore: data.pagination.count === (filters?.limit || 50),
+        };
+      });
+    },
+
+    /**
+     * Get dependabot alert by ID
+     */
+    get: async (id: string): Promise<DependabotAlert> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/dependabot-alerts/${id}`);
+        return data;
+      });
+    },
+
+    /**
+     * Get alert statistics
+     */
+    stats: async (repository?: string): Promise<AlertStats> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/dependabot-alerts/stats', { params: { repository } });
+        return data;
+      });
+    },
+
+    /**
+     * Export alerts to CSV
+     */
+    export: async (filters?: SecurityAlertFilters): Promise<string> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/dependabot-alerts/export', {
+          params: filters,
+          responseType: 'text',
+        });
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Code Scanning Alerts API
+   */
+  public readonly codeScanningAlerts = {
+    /**
+     * List code scanning alerts with filters
+     */
+    list: async (filters?: SecurityAlertFilters): Promise<PaginatedResponse<CodeScanningAlert>> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/code-scanning-alerts', { params: filters });
+        return {
+          data: data.data,
+          total: data.pagination.total,
+          page: Math.floor((filters?.offset || 0) / (filters?.limit || 50)) + 1,
+          limit: filters?.limit || 50,
+          hasMore: data.pagination.count === (filters?.limit || 50),
+        };
+      });
+    },
+
+    /**
+     * Get code scanning alert by ID
+     */
+    get: async (id: string): Promise<CodeScanningAlert> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/code-scanning-alerts/${id}`);
+        return data;
+      });
+    },
+
+    /**
+     * Get alert statistics
+     */
+    stats: async (repository?: string): Promise<AlertStats> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/code-scanning-alerts/stats', { params: { repository } });
+        return data;
+      });
+    },
+
+    /**
+     * Export alerts to CSV
+     */
+    export: async (filters?: SecurityAlertFilters): Promise<string> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/code-scanning-alerts/export', {
+          params: filters,
+          responseType: 'text',
+        });
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Secret Scanning Alerts API
+   */
+  public readonly secretScanningAlerts = {
+    /**
+     * List secret scanning alerts with filters
+     */
+    list: async (filters?: SecurityAlertFilters): Promise<PaginatedResponse<SecretScanningAlert>> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/secret-scanning-alerts', { params: filters });
+        return {
+          data: data.data,
+          total: data.pagination.total,
+          page: Math.floor((filters?.offset || 0) / (filters?.limit || 50)) + 1,
+          limit: filters?.limit || 50,
+          hasMore: data.pagination.count === (filters?.limit || 50),
+        };
+      });
+    },
+
+    /**
+     * Get secret scanning alert by ID
+     */
+    get: async (id: string): Promise<SecretScanningAlert> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/secret-scanning-alerts/${id}`);
+        return data;
+      });
+    },
+
+    /**
+     * Get alert statistics
+     */
+    stats: async (repository?: string): Promise<AlertStats> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/secret-scanning-alerts/stats', { params: { repository } });
+        return data;
+      });
+    },
+
+    /**
+     * Export alerts to CSV
+     */
+    export: async (filters?: SecurityAlertFilters): Promise<string> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/secret-scanning-alerts/export', {
+          params: filters,
+          responseType: 'text',
+        });
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Security Advisories API
+   */
+  public readonly securityAdvisories = {
+    /**
+     * List security advisories with filters
+     */
+    list: async (filters?: SecurityAlertFilters): Promise<PaginatedResponse<SecurityAdvisory>> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/security-advisories', { params: filters });
+        return {
+          data: data.data,
+          total: data.pagination.total,
+          page: Math.floor((filters?.offset || 0) / (filters?.limit || 50)) + 1,
+          limit: filters?.limit || 50,
+          hasMore: data.pagination.count === (filters?.limit || 50),
+        };
+      });
+    },
+
+    /**
+     * Get security advisory by ID
+     */
+    get: async (id: string): Promise<SecurityAdvisory> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/security-advisories/${id}`);
+        return data;
+      });
+    },
+
+    /**
+     * Get advisory statistics
+     */
+    stats: async (): Promise<AlertStats> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/security-advisories/stats');
+        return data;
+      });
+    },
+
+    /**
+     * Triage security advisory
+     */
+    triage: async (id: string, request: TriageRequest): Promise<SecurityAdvisory> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.post(`/api/v1/security-advisories/${id}/triage`, request);
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Repositories API
+   */
+  public readonly repositories = {
+    /**
+     * List repositories
+     */
+    list: async (filters?: { scan_enabled?: boolean }): Promise<Repository[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/repositories', { params: filters });
+        return data.data || data;
+      });
+    },
+
+    /**
+     * Get repository by owner/name
+     */
+    get: async (owner: string, repo: string): Promise<Repository> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/repositories/${owner}/${repo}`);
+        return data;
+      });
+    },
+
+    /**
+     * Update repository settings
+     */
+    update: async (owner: string, repo: string, request: RepositoryUpdateRequest): Promise<Repository> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.put(`/api/v1/repositories/${owner}/${repo}`, request);
+        return data;
+      });
+    },
+
+    /**
+     * Delete repository
+     */
+    delete: async (owner: string, repo: string): Promise<void> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        await this.http.delete(`/api/v1/repositories/${owner}/${repo}`);
+      });
+    },
+  };
+
+  /**
+   * HTTP Subscribers API
+   */
+  public readonly httpSubscribers = {
+    /**
+     * List HTTP webhook subscribers
+     */
+    list: async (): Promise<HttpSubscriber[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/http-subscribers');
+        return data.data || data;
+      });
+    },
+
+    /**
+     * Create HTTP subscriber
+     */
+    create: async (request: HttpSubscriberCreateRequest): Promise<HttpSubscriber> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.post('/api/v1/http-subscribers', request);
+        return data;
+      });
+    },
+
+    /**
+     * Update HTTP subscriber
+     */
+    update: async (id: string, request: HttpSubscriberUpdateRequest): Promise<HttpSubscriber> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.put(`/api/v1/http-subscribers/${id}`, request);
+        return data;
+      });
+    },
+
+    /**
+     * Delete HTTP subscriber
+     */
+    delete: async (id: string): Promise<void> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        await this.http.delete(`/api/v1/http-subscribers/${id}`);
+      });
+    },
+
+    /**
+     * Test HTTP subscriber webhook delivery
+     */
+    test: async (id: string): Promise<HttpSubscriberTestResult> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.post(`/api/v1/http-subscribers/${id}/test`);
+        return data;
+      });
+    },
+  };
+
+  /**
+   * API Keys API
+   */
+  public readonly apiKeys = {
+    /**
+     * List API keys
+     */
+    list: async (): Promise<ApiKey[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/keys');
+        return data.data || data;
+      });
+    },
+
+    /**
+     * Create API key
+     */
+    create: async (request: ApiKeyCreateRequest): Promise<{ key: ApiKey; secret: string }> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.post('/api/v1/keys', request);
+        return data;
+      });
+    },
+
+    /**
+     * Update API key
+     */
+    update: async (id: string, request: ApiKeyUpdateRequest): Promise<ApiKey> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.put(`/api/v1/keys/${id}`, request);
+        return data;
+      });
+    },
+
+    /**
+     * Delete API key
+     */
+    delete: async (id: string): Promise<void> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        await this.http.delete(`/api/v1/keys/${id}`);
+      });
+    },
+
+    /**
+     * Rotate API key
+     */
+    rotate: async (id: string): Promise<ApiKeyRotationResult> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.post(`/api/v1/keys/${id}/rotate`);
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Audit Logs API
+   */
+  public readonly audit = {
+    /**
+     * List audit events
+     */
+    list: async (params?: { limit?: number; offset?: number }): Promise<PaginatedResponse<AuditEvent>> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/audit', { params });
+        return {
+          data: data.data,
+          total: data.pagination?.total || data.data.length,
+          page: Math.floor((params?.offset || 0) / (params?.limit || 50)) + 1,
+          limit: params?.limit || 50,
+          hasMore: data.data.length === (params?.limit || 50),
+        };
+      });
+    },
+
+    /**
+     * Get audit event by ID
+     */
+    get: async (id: string): Promise<AuditEvent> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/audit/${id}`);
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Health API
+   */
+  public readonly health = {
+    /**
+     * Get system health status
+     */
+    status: async (): Promise<HealthStatus> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/health');
+        return data;
+      });
+    },
+
+    /**
+     * Get handler configurations
+     */
+    handlers: async (): Promise<HandlerConfig[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/health/handlers');
+        return data.data || data;
+      });
+    },
+
+    /**
+     * Get pending events summary
+     */
+    pendingEvents: async (): Promise<PendingEvents> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/health/pending-events');
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Dashboard API
+   */
+  public readonly dashboard = {
+    /**
+     * Get dashboard statistics
+     */
+    stats: async (): Promise<DashboardStats> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/dashboard/stats');
+        return data;
+      });
+    },
+
+    /**
+     * Get time-series data
+     */
+    timeSeries: async (metric: string, interval?: string): Promise<TimeSeriesPoint[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/dashboard/timeseries', {
+          params: { metric, interval },
+        });
+        return data.data || data;
+      });
+    },
+  };
+
+  /**
+   * Pipelines API
+   */
+  public readonly pipelines = {
+    /**
+     * List pipeline statuses
+     */
+    list: async (repository?: string): Promise<PipelineStatus[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/pipelines', { params: { repository } });
+        return data.data || data;
+      });
+    },
+
+    /**
+     * Get pipeline status for repository
+     */
+    get: async (owner: string, repo: string): Promise<PipelineStatus[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/pipelines/${owner}/${repo}`);
+        return data.data || data;
+      });
+    },
+  };
+
+  /**
+   * Query Logs API
+   */
+  public readonly queryLogs = {
+    /**
+     * List query logs
+     */
+    list: async (params?: { limit?: number; offset?: number }): Promise<PaginatedResponse<QueryLog>> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/query-logs', { params });
+        return {
+          data: data.data,
+          total: data.pagination?.total || data.data.length,
+          page: Math.floor((params?.offset || 0) / (params?.limit || 50)) + 1,
+          limit: params?.limit || 50,
+          hasMore: data.data.length === (params?.limit || 50),
+        };
+      });
+    },
+  };
+
+  /**
+   * Agent Subscriptions API
+   */
+  public readonly subscriptions = {
+    /**
+     * List agent subscriptions
+     */
+    list: async (): Promise<AgentSubscription[]> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/subscriptions');
+        return data.data || data;
+      });
+    },
+
+    /**
+     * Create agent subscription
+     */
+    create: async (request: AgentSubscriptionCreateRequest): Promise<AgentSubscription> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.post('/api/v1/subscriptions', request);
+        return data;
+      });
+    },
+
+    /**
+     * Delete agent subscription
+     */
+    delete: async (id: string): Promise<void> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        await this.http.delete(`/api/v1/subscriptions/${id}`);
       });
     },
   };
