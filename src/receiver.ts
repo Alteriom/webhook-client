@@ -85,8 +85,8 @@ class DeliveryCache {
 
     this.processed.add(deliveryId);
 
-    // Auto-cleanup after 1 hour
-    setTimeout(() => this.processed.delete(deliveryId), 3600000);
+    // Auto-cleanup after 1 hour (unref so it doesn't keep process alive)
+    setTimeout(() => this.processed.delete(deliveryId), 3600000).unref();
 
     return false;
   }

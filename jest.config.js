@@ -18,4 +18,10 @@ module.exports = {
   },
   coverageReporters: ['text', 'lcov', 'html'],
   verbose: true,
+  // Force proper cleanup to prevent "worker process failed to exit" errors
+  testTimeout: 10000,
+  forceExit: true,
+  clearMocks: true,
+  resetMocks: true,
+  restoreMocks: true,
 };
