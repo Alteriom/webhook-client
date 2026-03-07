@@ -25,6 +25,9 @@ export type {
   ApiError as IApiError,
   ValidationError as IValidationError,
   RateLimitError as IRateLimitError,
+  // Aggregate types
+  AggregateListParams,
+  AggregateStatsResponse,
   // Security types
   DependabotAlert,
   CodeScanningAlert,

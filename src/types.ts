@@ -202,6 +202,7 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
   hasMore: boolean;
+  cursor?: string; // Next page cursor for cursor-based pagination
 }
 
 /**
@@ -801,4 +802,62 @@ export interface TriageRequest {
   status: 'not_applicable' | 'resolved';
   reason?: string;
   notes?: string;
+}
+
+// ============================================================================
+// Aggregate Filtering Types
+// ============================================================================
+
+/**
+ * Query parameters for listing aggregates with filtering
+ */
+export interface AggregateListParams {
+  /** Filter by repository (supports wildcards: "North-Relay/*") */
+  repository?: string;
+  
+  /** Filter by entity type (issue, pull_request, commit, etc.) */
+  entity_type?: string;
+  
+  /** Filter by aggregate type (workflow_run, workflow_job, deployment_status, etc.) */
+  aggregate_type?: string;
+  
+  /** Server-side timestamp filtering - only fetch events after this time (ISO 8601) */
+  since?: string;
+  
+  /** Server-side timestamp filtering - only fetch events before this time (ISO 8601) */
+  until?: string;
+  
+  /** Filter by enrichment status (true/false) */
+  enriched?: boolean;
+  
+  /** Search in entity_id, title, and summary */
+  search?: string;
+  
+  /** Sort field (last_event_at, event_count, etc.) */
+  sort_by?: string;
+  
+  /** Sort direction (asc/desc) */
+  sort_direction?: 'asc' | 'desc';
+  
+  /** Maximum results per page (1-100, default 50) */
+  limit?: number;
+  
+  /** Cursor for pagination (base64 encoded) */
+  cursor?: string;
+}
+
+/**
+ * Aggregate stats response
+ */
+export interface AggregateStatsResponse {
+  total_aggregates: number;
+  total_events: number;
+  by_type: Record<string, number>;
+  by_repository: Record<string, number>;
+  enriched_count: number;
+  recent_activity: {
+    last_hour: number;
+    last_24h: number;
+    last_7d: number;
+  };
 }

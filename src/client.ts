@@ -14,6 +14,8 @@ import type {
   Subscriber,
   PaginatedResponse,
   EventListParams,
+  AggregateListParams,
+  AggregateStatsResponse,
   CreateSubscriberRequest,
   UpdateSubscriberRequest,
   // Security types
@@ -310,19 +312,31 @@ export class AlteriomWebhookClient {
    */
   public readonly aggregates = {
     /**
-     * List aggregates
+     * List aggregates with server-side filtering and pagination
      */
-    list: async (params?: { page?: number; limit?: number }): Promise<PaginatedResponse<EventAggregate>> => {
+    list: async (params?: AggregateListParams): Promise<PaginatedResponse<EventAggregate>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
         const { data } = await this.http.get('/api/v1/aggregates', { params });
         return {
           data: data.data,
           total: data.pagination?.total || data.data.length,
-          page: params?.page ?? 1,
+          page: params?.cursor ? 0 : 1, // Cursor-based pagination doesn't have page numbers
           limit: params?.limit ?? 50,
-          hasMore: data.data.length === (params?.limit ?? 50),
+          hasMore: data.pagination?.has_more || false,
+          cursor: data.pagination?.next_cursor, // Include next cursor
         };
+      });
+    },
+
+    /**
+     * Get aggregate statistics
+     */
+    stats: async (): Promise<AggregateStatsResponse> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/aggregates/stats');
+        return data;
       });
     },
   };
