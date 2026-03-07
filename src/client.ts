@@ -716,7 +716,7 @@ export class AlteriomWebhookClient {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
         const { data } = await this.http.get('/api/v1/repositories', { params: filters });
-        return data.data || data;
+        return data.repositories || data.data || data;
       });
     },
 
