@@ -133,10 +133,10 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
         data: { data: [], pagination: { total: 0 } },
       });
 
-      await client.aggregates.list({ page: 3, limit: 10 });
+      await client.aggregates.list({ limit: 10, cursor: 'abc123' });
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/aggregates', {
-        params: { page: 3, limit: 10 },
+        params: { limit: 10, cursor: 'abc123' },
       });
     });
   });
