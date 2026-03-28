@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-03-28
 
 ### Added
-- **TypedAggregate** discriminated union — each `aggregate_type` value now carries a narrowed `summary` shape (22 types total: `workflow_run`, `workflow_job`, `pull_request`, `push`, `issues`, `issue_comment`, `create`, `delete`, `deployment`, `deployment_status`, `release`, `check_run`, `check_suite`, `status`, `page_build`, `public`, `member`, `fork`, `watch`, `gollum`, `discussion`, `discussion_comment`)
+- **TypedAggregate** discriminated union — each `aggregate_type` value now carries a narrowed `summary` shape (22 types: `workflow_run`, `workflow_job`, `pull_request`, `push`, `issue`, `release`, `deployment`, `deployment_status`, `check_run`, `check_suite`, `branch_activity`, `email_delivery`, `security_advisory`, `code_scanning_alert`, `dependabot_alert`, `registry_package`, `ref_activity`, `project_item`, `label_activity`, `commit_status`, `repository_config`, `workflow_dispatch`)
 - **Typed summary shapes** — `WorkflowRunSummary`, `WorkflowJobSummary`, `PullRequestSummary`, etc. per aggregate type for full TypeScript narrowing
 - **New `AggregateListParams` filters** for command center integration:
   - `branch` — filter by branch name (e.g. `'main'`, `'feature/*'`)
@@ -19,8 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Signals API Stability
 This release stabilises the aggregates API for command center integration. The `TypedAggregate` union, typed summary shapes, and new filter params are the foundation for building dashboards and automation on top of the webhook event stream.
 
+### Changed
+- CI now tests on Node 22 and 24 (dropped 18 and 20)
+- Minimum Node version set to 22 in `engines` field
+- Resolved all npm audit vulnerabilities (brace-expansion, flatted, handlebars, picomatch)
+
 ### Breaking Changes
-- None (backwards compatible — existing code using `aggregate_type: string` continues to work)
+- Requires Node.js >= 22 (dropped support for 18 and 20)
 
 ## [0.2.0] - 2026-03-07
 
