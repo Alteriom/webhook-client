@@ -120,3 +120,11 @@ export type { ReceiverConfig } from './receiver';
 
 // Export framework adapters
 export { expressReceiver, fastifyReceiver, nextjsReceiver } from './adapters';
+
+// Export WebSocket client
+export { WebSocketClient } from './ws-client';
+export type {
+  WebSocketClientConfig,
+  WebhookEventPayload,
+  WebSocketEventMap,
+} from './ws-types';

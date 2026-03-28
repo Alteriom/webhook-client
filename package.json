@@ -43,6 +43,14 @@
     "axios": "^1.7.9",
     "zod": "^3.24.1"
   },
+  "peerDependencies": {
+    "socket.io-client": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "socket.io-client": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
