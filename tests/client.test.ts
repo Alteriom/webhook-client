@@ -59,7 +59,7 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
       expect(mockedAxios.create).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-Client-Version': '1.0.0',
+            'X-Client-Version': '1.1.0',
           }),
         })
       );

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-28
+
+### Added
+- **WebSocketClient** — real-time event streaming via Socket.IO wrapper
+  - Auto-resubscribe on reconnect (server loses subscription state)
+  - Typed `WebhookEventPayload` matching server's `webhook-event` emission
+  - Configurable event and repository filters with glob support
+  - Lifecycle events: `connected`, `disconnected`, `subscribed`, `error`
+  - `updateSubscription()` to change filters without reconnecting
+- `socket.io-client` as optional peer dependency (REST-only consumers unaffected)
+
 ## [1.0.0] - 2026-03-28
 
 ### Added
@@ -66,6 +77,7 @@ This release stabilises the aggregates API for command center integration. The `
 - Event, delivery, subscriber, security, and repository APIs
 - Complete TypeScript type safety
 
+[1.1.0]: https://github.com/Alteriom/webhook-client/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Alteriom/webhook-client/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/Alteriom/webhook-client/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Alteriom/webhook-client/releases/tag/v0.1.0

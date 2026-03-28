@@ -92,6 +92,52 @@ export default nextjsReceiver({
 });
 \`\`\`
 
+## Real-Time Events — WebSocket
+
+Stream webhook events in real-time via the connector's Socket.IO server.
+
+**Requires:** `npm install socket.io-client` (optional peer dependency)
+
+```typescript
+import { WebSocketClient } from '@alteriom/webhook-client';
+
+const ws = new WebSocketClient({
+  url: 'https://webhook.alteriom.net',
+  apiKey: process.env.WEBHOOK_API_KEY!,
+  events: ['workflow_run', 'pull_request'],
+  repos: ['Alteriom/*', 'North-Relay/*'],
+});
+
+ws.on('event', (event) => {
+  console.log(`${event.event}/${event.action} on ${event.repository}`);
+  console.log('Summary:', event.summary);
+});
+
+ws.on('connected', ({ clientId }) => {
+  console.log('Connected as', clientId);
+});
+
+ws.on('error', (err) => {
+  console.error('Connection error:', err.message);
+});
+
+ws.connect();
+
+// Update filters without reconnecting
+ws.updateSubscription({ events: ['workflow_run.completed'] });
+
+// Clean shutdown
+ws.disconnect();
+```
+
+### WebSocket Features
+
+- **Auto-resubscribe:** Subscription filters are re-sent on every reconnect (server loses state on disconnect)
+- **Typed payloads:** `WebhookEventPayload` with `event`, `action`, `repository`, `summary`, `payload`
+- **Configurable filters:** Event types (`push`, `pull_request.opened`) and repo patterns (`Alteriom/*`)
+- **Lifecycle events:** `connected`, `disconnected`, `subscribed`, `error`
+- **Optional dependency:** `socket.io-client` is a peer dep — REST-only consumers don't need it
+
 ## API Client
 
 ### Configuration
