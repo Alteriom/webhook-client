@@ -1065,7 +1065,7 @@ export interface AggregateListParams {
   entity_type?: string;
   
   /** Filter by aggregate type (workflow_run, workflow_job, deployment_status, etc.) */
-  aggregate_type?: string;
+  aggregate_type?: AggregateType;
   
   /** Server-side timestamp filtering - only fetch events after this time (ISO 8601) */
   since?: string;

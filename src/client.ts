@@ -9,6 +9,7 @@ import type {
   // Core types
   WebhookEvent,
   EventAggregate,
+  TypedAggregate,
   Enrichment,
   Delivery,
   Subscriber,
@@ -314,7 +315,7 @@ export class AlteriomWebhookClient {
     /**
      * List aggregates with server-side filtering and pagination
      */
-    list: async (params?: AggregateListParams): Promise<PaginatedResponse<EventAggregate>> => {
+    list: async (params?: AggregateListParams): Promise<PaginatedResponse<TypedAggregate>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
         const { data } = await this.http.get('/api/v1/aggregates', { params });
