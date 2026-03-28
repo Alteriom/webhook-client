@@ -48,7 +48,7 @@ describe('webhookReceiver', () => {
       repository: 'Alteriom/test',
       entity_type: 'pull_request',
       entity_id: 'pr-456',
-      aggregate_type: 'pr_review',
+      aggregate_type: 'pull_request',
       summary: {},
       event_count: 3,
       first_event_at: '2026-02-11T00:00:00Z',

@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-03-28
+
+### Added
+- **TypedAggregate** discriminated union — each `aggregate_type` value now carries a narrowed `summary` shape (22 types: `workflow_run`, `workflow_job`, `pull_request`, `push`, `issue`, `release`, `deployment`, `deployment_status`, `check_run`, `check_suite`, `branch_activity`, `email_delivery`, `security_advisory`, `code_scanning_alert`, `dependabot_alert`, `registry_package`, `ref_activity`, `project_item`, `label_activity`, `commit_status`, `repository_config`, `workflow_dispatch`)
+- **Typed summary shapes** — `WorkflowRunSummary`, `WorkflowJobSummary`, `PullRequestSummary`, etc. per aggregate type for full TypeScript narrowing
+- **New `AggregateListParams` filters** for command center integration:
+  - `branch` — filter by branch name (e.g. `'main'`, `'feature/*'`)
+  - `conclusion` — filter by workflow conclusion (`'success'`, `'failure'`, `'cancelled'`, etc.)
+  - `workflow_name` — filter by workflow display name
+- **`response_body` field** added to `HttpSubscriberTestResult` — raw response body from test delivery
+
+### Signals API Stability
+This release stabilises the aggregates API for command center integration. The `TypedAggregate` union, typed summary shapes, and new filter params are the foundation for building dashboards and automation on top of the webhook event stream.
+
+### Changed
+- CI now tests on Node 22 and 24 (dropped 18 and 20)
+- Minimum Node version set to 22 in `engines` field
+- Resolved all npm audit vulnerabilities (brace-expansion, flatted, handlebars, picomatch)
+
+### Breaking Changes
+- Requires Node.js >= 22 (dropped support for 18 and 20)
+
 ## [0.2.0] - 2026-03-07
 
 ### Added
@@ -44,5 +66,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Event, delivery, subscriber, security, and repository APIs
 - Complete TypeScript type safety
 
+[1.0.0]: https://github.com/Alteriom/webhook-client/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/Alteriom/webhook-client/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Alteriom/webhook-client/releases/tag/v0.1.0

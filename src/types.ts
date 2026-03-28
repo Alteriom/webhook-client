@@ -32,7 +32,7 @@ export interface EventAggregate {
   repository: string;
   entity_type: 'issue' | 'pull_request' | 'commit' | 'discussion' | 'release' | 'workflow' | 'other';
   entity_id: string;
-  aggregate_type: string;
+  aggregate_type: AggregateType;
   summary: Record<string, unknown>;
   event_count: number;
   first_event_at: string;
@@ -188,6 +188,251 @@ export type DeliveryMode = 'realtime' | 'aggregate';
  * Entity type for aggregation
  */
 export type EntityType = 'issue' | 'pull_request' | 'commit' | 'discussion' | 'release' | 'workflow' | 'other';
+
+/**
+ * Aggregate type for event grouping
+ */
+export type AggregateType =
+  | 'workflow_run'
+  | 'workflow_job'
+  | 'pull_request'
+  | 'push'
+  | 'issue'
+  | 'release'
+  | 'deployment'
+  | 'deployment_status'
+  | 'check_run'
+  | 'check_suite'
+  | 'branch_activity'
+  | 'email_delivery'
+  | 'security_advisory'
+  | 'code_scanning_alert'
+  | 'dependabot_alert'
+  | 'registry_package'
+  | 'ref_activity'
+  | 'project_item'
+  | 'label_activity'
+  | 'commit_status'
+  | 'repository_config'
+  | 'workflow_dispatch';
+
+// ============================================================================
+// Typed Aggregate Summary Shapes
+// ============================================================================
+
+export interface WorkflowRunSummary {
+  workflow_name: string;
+  workflow_id: number;
+  run_id: number;
+  run_number: number;
+  status: string;
+  conclusion: string | null;
+  branch: string;
+  commit: string;
+  actor: string;
+  url: string;
+}
+
+export interface WorkflowJobSummary {
+  job_name: string;
+  job_id: number;
+  run_id: number;
+  status: string;
+  conclusion: string | null;
+  runner: string | null;
+  url: string;
+}
+
+export interface PullRequestSummary {
+  number: number;
+  title: string;
+  state: string;
+  author: string;
+  head: string;
+  base: string;
+  url: string;
+}
+
+export interface IssueSummary {
+  number: number;
+  title: string;
+  state: string;
+  author: string;
+  url: string;
+}
+
+export interface ReleaseSummary {
+  tag: string;
+  name: string;
+  draft: boolean;
+  prerelease: boolean;
+  author: string;
+  url: string;
+}
+
+export interface DeploymentSummary {
+  deployment_id: number;
+  environment: string;
+  ref: string;
+  commit: string;
+  state: string | null;
+  creator: string;
+  url: string;
+}
+
+export interface CheckRunSummary {
+  name: string;
+  status: string;
+  conclusion: string | null;
+  commit: string;
+  url: string;
+}
+
+export interface CheckSuiteSummary {
+  name: string;
+  status: string;
+  conclusion: string | null;
+  commit: string;
+  url: string;
+}
+
+export interface BranchActivitySummary {
+  branch: string;
+  commits: number;
+  pusher: string;
+  head: string;
+}
+
+export interface EmailDeliverySummary {
+  message_id: string;
+  recipient: string;
+  sender: string;
+  subject: string;
+  status: string;
+  event_type: string;
+  timestamp: string;
+}
+
+export interface SecurityAdvisorySummary {
+  ghsa_id: string;
+  severity: string;
+  summary: string;
+  cve_id: string | null;
+  published_at: string;
+  action: string;
+  url: string;
+}
+
+export interface CodeScanningAlertSummary {
+  alert_number: number;
+  rule_id: string;
+  severity: string;
+  state: string;
+  tool: string;
+  ref: string;
+  commit: string;
+  action: string;
+  url: string;
+}
+
+export interface DependabotAlertSummary {
+  alert_number: number;
+  state: string;
+  severity: string;
+  package: string;
+  ecosystem: string;
+  manifest: string;
+  vulnerability: string;
+  action: string;
+  url: string;
+}
+
+export interface RegistryPackageSummary {
+  package_name: string;
+  package_type: string;
+  version: string;
+  action: string;
+  registry_url: string;
+  package_id: number;
+}
+
+export interface RefActivitySummary {
+  ref: string;
+  ref_type: string;
+  action: string;
+  pusher: string;
+  sha: string;
+  description: string | null;
+}
+
+export interface ProjectItemSummary {
+  item_id: number;
+  project_node_id: string;
+  content_node_id: string;
+  content_type: string;
+  action: string;
+  creator: string;
+}
+
+export interface LabelActivitySummary {
+  label_name: string;
+  label_color: string;
+  action: string;
+  description: string | null;
+}
+
+export interface CommitStatusSummary {
+  sha: string;
+  context: string;
+  state: string;
+  description: string | null;
+  target_url: string | null;
+  branches: string[];
+}
+
+export interface RepositoryConfigSummary {
+  action: string;
+  changes: Record<string, unknown>;
+  repo_name: string;
+  default_branch: string;
+  visibility: string;
+}
+
+export interface WorkflowDispatchSummary {
+  workflow_name: string;
+  workflow_id: number;
+  ref: string;
+  inputs: Record<string, unknown> | null;
+  sender: string;
+}
+
+/**
+ * Discriminated union of EventAggregate with typed summary shapes.
+ * Narrow on `aggregate_type` to get a fully-typed `summary`.
+ */
+export type TypedAggregate =
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'workflow_run'; summary: WorkflowRunSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'workflow_job'; summary: WorkflowJobSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'pull_request'; summary: PullRequestSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'issue'; summary: IssueSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'release'; summary: ReleaseSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'deployment'; summary: DeploymentSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'deployment_status'; summary: DeploymentSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'check_run'; summary: CheckRunSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'check_suite'; summary: CheckSuiteSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'branch_activity'; summary: BranchActivitySummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'push'; summary: BranchActivitySummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'email_delivery'; summary: EmailDeliverySummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'security_advisory'; summary: SecurityAdvisorySummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'code_scanning_alert'; summary: CodeScanningAlertSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'dependabot_alert'; summary: DependabotAlertSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'registry_package'; summary: RegistryPackageSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'ref_activity'; summary: RefActivitySummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'project_item'; summary: ProjectItemSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'label_activity'; summary: LabelActivitySummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'commit_status'; summary: CommitStatusSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'repository_config'; summary: RepositoryConfigSummary })
+  | (Omit<EventAggregate, 'aggregate_type' | 'summary'> & { aggregate_type: 'workflow_dispatch'; summary: WorkflowDispatchSummary });
 
 // ============================================================================
 // API Request/Response Types
@@ -548,6 +793,7 @@ export interface HttpSubscriberTestResult {
   status_code?: number;
   latency_ms?: number;
   error?: string;
+  response_body?: string;
 }
 
 // ============================================================================
@@ -819,7 +1065,7 @@ export interface AggregateListParams {
   entity_type?: string;
   
   /** Filter by aggregate type (workflow_run, workflow_job, deployment_status, etc.) */
-  aggregate_type?: string;
+  aggregate_type?: AggregateType;
   
   /** Server-side timestamp filtering - only fetch events after this time (ISO 8601) */
   since?: string;
@@ -844,6 +1090,15 @@ export interface AggregateListParams {
   
   /** Cursor for pagination (base64 encoded) */
   cursor?: string;
+
+  /** Filter by branch in summary JSONB (for workflow runs) */
+  branch?: string;
+
+  /** Filter by conclusion in summary JSONB (success, failure, cancelled, etc.) */
+  conclusion?: string;
+
+  /** Filter by workflow name in summary JSONB */
+  workflow_name?: string;
 }
 
 /**

@@ -546,6 +546,50 @@ const aggregates = await client.aggregates.list({ page: 1, limit: 50 });
 const aggregate = aggregates.data.find(a => a.entity_id === 'some-id');
 \`\`\`
 
+### TypedAggregate — Type Narrowing (NEW in v1.0.0)
+
+`aggregate_type` is now a union of 22 literal types instead of `string`. TypeScript narrows the `summary` shape automatically based on the type discriminant, giving you full type safety on aggregate data.
+
+\`\`\`typescript
+const { data } = await client.aggregates.list({
+  aggregate_type: 'workflow_run',
+  branch: 'main',
+  conclusion: 'failure',
+  limit: 5,
+});
+
+for (const agg of data) {
+  // TypeScript narrows summary type based on aggregate_type
+  if (agg.aggregate_type === 'workflow_run') {
+    console.log(`${agg.summary.workflow_name} failed on ${agg.summary.branch}`);
+  }
+}
+\`\`\`
+
+New filter parameters for `aggregates.list()`:
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `branch` | `string` | Filter by branch name (e.g. `'main'`, `'feature/*'`) |
+| `conclusion` | `string` | Filter by workflow conclusion (`'success'`, `'failure'`, `'cancelled'`, etc.) |
+| `workflow_name` | `string` | Filter by workflow display name |
+
+### Python HMAC Signature Verification
+
+For teams integrating the webhook server from Python without a dedicated SDK:
+
+\`\`\`python
+import hmac, hashlib, time
+
+def verify_signature(body: bytes, signature: str, timestamp: str, secret: str, tolerance: int = 300) -> bool:
+    age = abs(int(time.time()) - int(timestamp))
+    if age > tolerance:
+        return False
+    data = f'{timestamp}.{body.decode()}'
+    expected = 'sha256=' + hmac.new(secret.encode(), data.encode(), hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, signature)
+\`\`\`
+
 ### Enrichment API
 
 \`\`\`typescript

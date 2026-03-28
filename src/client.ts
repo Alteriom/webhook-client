@@ -8,7 +8,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import type {
   // Core types
   WebhookEvent,
-  EventAggregate,
+  TypedAggregate,
   Enrichment,
   Delivery,
   Subscriber,
@@ -222,7 +222,7 @@ export class AlteriomWebhookClient {
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
         'Content-Type': 'application/json',
-        'X-Client-Version': '0.1.0',
+        'X-Client-Version': '1.0.0',
         'X-API-Version': '1.0',
       },
     });
@@ -314,7 +314,7 @@ export class AlteriomWebhookClient {
     /**
      * List aggregates with server-side filtering and pagination
      */
-    list: async (params?: AggregateListParams): Promise<PaginatedResponse<EventAggregate>> => {
+    list: async (params?: AggregateListParams): Promise<PaginatedResponse<TypedAggregate>> => {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
         const { data } = await this.http.get('/api/v1/aggregates', { params });
