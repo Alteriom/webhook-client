@@ -8,7 +8,6 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import type {
   // Core types
   WebhookEvent,
-  EventAggregate,
   TypedAggregate,
   Enrichment,
   Delivery,
