@@ -222,7 +222,7 @@ export class AlteriomWebhookClient {
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
         'Content-Type': 'application/json',
-        'X-Client-Version': '0.1.0',
+        'X-Client-Version': '1.0.0',
         'X-API-Version': '1.0',
       },
     });
