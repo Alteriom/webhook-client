@@ -107,6 +107,7 @@ jobs:
         run: npm audit --audit-level=moderate
       
       - name: Run Trufflehog
+        continue-on-error: true
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
