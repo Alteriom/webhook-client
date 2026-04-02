@@ -531,34 +531,38 @@ logs.data.forEach(log => {
 });
 \`\`\`
 
-### Agent Subscriptions API (NEW in v0.1.0)
+### Agent Subscriptions API (NEW in v1.1.0)
 
-Manage agent event subscriptions.
+Agent subscriptions provide fine-grained filtering per agent — subscribe only to the repos and event types you care about.
 
 \`\`\`typescript
-// List agent subscriptions
-const subscriptions = await client.subscriptions.list();
-subscriptions.forEach(sub => {
-  console.log(`${sub.agent_name} (${sub.agent_id})`);
-  console.log(`  Events: ${sub.events.join(', ')}`);
-  console.log(`  Delivery: ${sub.delivery_mode}`);
+// Create a CI monitoring subscription for Jarvis
+const subscription = await client.agentSubscriptions.create({
+  agent_name: 'jarvis-ci-monitor',
+  repositories: [
+    'North-Relay/northrelay-platform',
+    'Alteriom/alteriom-dev-ops',
+    'Alteriom/alteriom-webhook-connector'
+  ],
+  event_types: ['workflow_run', 'workflow_job', 'deployment_status'],
+  delivery_mode: 'realtime',
+  webhook_url: 'https://your-agent.example.com/webhook',
 });
 
-// Create agent subscription
-const subscription = await client.subscriptions.create({
-  agent_id: 'jarvis',
-  agent_name: 'Jarvis AI Agent',
-  events: ['workflow_run', 'deployment'],
-  filters: {
-    repositories: ['North-Relay/*'],
-    conclusion: ['success', 'failure'],
-  },
-  delivery_mode: 'push',
-  delivery_url: 'https://jarvis.example.com/webhook',
+// List subscriptions
+const { subscriptions } = await client.agentSubscriptions.list();
+
+// Update subscription (add a repo)
+await client.agentSubscriptions.update(subscription.id, {
+  filters: { repositories: ['North-Relay/northrelay-platform', 'Alteriom/new-repo'] },
 });
+
+// Get delivery stats
+const stats = await client.agentSubscriptions.stats(subscription.id);
+console.log(`Success rate: ${stats.success_rate}%`);
 
 // Delete subscription
-await client.subscriptions.delete(subscription.id);
+await client.agentSubscriptions.delete(subscription.id);
 \`\`\`
 
 ### Events API

@@ -58,6 +58,8 @@ import type {
   // Subscription types
   AgentSubscription,
   AgentSubscriptionCreateRequest,
+  SubscriptionStats,
+  SubscriptionDelivery,
 } from './types';
 import { ApiError, RateLimitError } from './errors';
 
@@ -807,6 +809,87 @@ export class AlteriomWebhookClient {
       await this.rateLimiter.acquire();
       return this.retryLogic.execute(async () => {
         const { data } = await this.http.post(`/api/v1/http-subscribers/${id}/test`);
+        return data;
+      });
+    },
+  };
+
+  /**
+   * Agent Subscriptions API
+   */
+  public readonly agentSubscriptions = {
+    /**
+     * List agent subscriptions
+     */
+    list: async (params?: { page?: number; limit?: number; active?: boolean }): Promise<{ subscriptions: AgentSubscription[]; total: number }> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get('/api/v1/subscriptions', { params });
+        return data;
+      });
+    },
+
+    /**
+     * Get a single agent subscription
+     */
+    get: async (subscriptionId: string): Promise<AgentSubscription> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/subscriptions/${subscriptionId}`);
+        return data;
+      });
+    },
+
+    /**
+     * Create an agent subscription
+     */
+    create: async (request: AgentSubscriptionCreateRequest): Promise<AgentSubscription> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.post('/api/v1/subscriptions', request);
+        return data;
+      });
+    },
+
+    /**
+     * Update an agent subscription
+     */
+    update: async (subscriptionId: string, request: Partial<AgentSubscriptionCreateRequest>): Promise<AgentSubscription> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.patch(`/api/v1/subscriptions/${subscriptionId}`, request);
+        return data;
+      });
+    },
+
+    /**
+     * Delete an agent subscription
+     */
+    delete: async (subscriptionId: string): Promise<void> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        await this.http.delete(`/api/v1/subscriptions/${subscriptionId}`);
+      });
+    },
+
+    /**
+     * Get delivery stats for a subscription
+     */
+    stats: async (subscriptionId: string): Promise<SubscriptionStats> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/subscriptions/${subscriptionId}/stats`);
+        return data;
+      });
+    },
+
+    /**
+     * Get deliveries for a subscription
+     */
+    deliveries: async (subscriptionId: string, params?: { page?: number; limit?: number }): Promise<{ deliveries: SubscriptionDelivery[]; total: number }> => {
+      await this.rateLimiter.acquire();
+      return this.retryLogic.execute(async () => {
+        const { data } = await this.http.get(`/api/v1/subscriptions/${subscriptionId}/deliveries`, { params });
         return data;
       });
     },

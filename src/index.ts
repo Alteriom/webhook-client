@@ -91,6 +91,7 @@ export type {
   // Subscription types
   AgentSubscription,
   AgentSubscriptionCreateRequest,
+  SubscriptionStats,
 } from './types';
 
 // Re-export error classes
