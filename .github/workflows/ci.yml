@@ -74,7 +74,7 @@ jobs:
       - name: Check bundle size
         run: |
           SIZE=$(du -sb dist/ | cut -f1)
-          MAX_SIZE=$((110 * 1024)) # 110 KB # 100 KB
+          MAX_SIZE=$((110 * 1024)) # 110 KB
           
           if [ $SIZE -gt $MAX_SIZE ]; then
             echo "❌ Bundle size too large: ${SIZE} bytes (max: ${MAX_SIZE})"
