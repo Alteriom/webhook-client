@@ -60,6 +60,7 @@ import type {
   AgentSubscriptionCreateRequest,
   SubscriptionStats,
   SubscriptionDelivery,
+  EventAggregate,
 } from './types';
 import { ApiError, RateLimitError } from './errors';
 
@@ -892,6 +893,65 @@ export class AlteriomWebhookClient {
         const { data } = await this.http.get(`/api/v1/subscriptions/${subscriptionId}/deliveries`, { params });
         return data;
       });
+    },
+
+    /**
+     * Poll for new events matching this subscription's filters.
+     * Designed for on_demand delivery mode — reads subscription repo/event filters,
+     * then fetches matching aggregates updated since the given timestamp.
+     *
+     * @param subscriptionId - The subscription ID to poll
+     * @param options.since - ISO timestamp to fetch events after (default: 1 hour ago)
+     * @param options.limit - Max events per page (default: 100)
+     * @returns Array of matching EventAggregate objects
+     */
+    poll: async (
+      subscriptionId: string,
+      options?: { since?: string; limit?: number }
+    ): Promise<EventAggregate[]> => {
+      // 1. Get subscription to read repo + event filters
+      const sub = await this.agentSubscriptions.get(subscriptionId);
+
+      // 2. Build aggregates query params
+      const since = options?.since || new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const limit = options?.limit || 100;
+
+      // 3. Fetch all pages of matching aggregates
+      const allAggregates: EventAggregate[] = [];
+      let cursor: string | undefined = undefined;
+      const MAX_PAGES = 10;
+
+      for (let page = 0; page < MAX_PAGES; page++) {
+        const params: AggregateListParams = {
+          since,
+          limit,
+          cursor,
+        };
+
+        // Filter by subscription repos if specified
+        // Note: API doesn't support multi-repo filter natively yet, so we fetch and filter client-side
+        const response = await this.aggregates.list(params);
+
+        if (!response.data || response.data.length === 0) break;
+
+        // Filter by subscription repos + event types if specified
+        const subRepos = new Set<string>(sub.filters?.repositories || []);
+        const subEventTypes = new Set<string>(sub.filters?.event_types || []);
+
+        const filtered = response.data.filter(agg => {
+          const repoMatch = subRepos.size === 0 || subRepos.has(agg.repository) ||
+            [...subRepos].some((r: string) => r.endsWith('/*') && agg.repository.startsWith(r.replace('/*', '/')));
+          const eventMatch = subEventTypes.size === 0 || subEventTypes.has(agg.aggregate_type);
+          return repoMatch && eventMatch;
+        });
+
+        allAggregates.push(...(filtered as unknown as EventAggregate[]));
+
+        if (!response.hasMore || !response.cursor) break;
+        cursor = response.cursor;
+      }
+
+      return allAggregates;
     },
   };
 
