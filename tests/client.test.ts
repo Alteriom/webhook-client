@@ -23,6 +23,7 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
       get: jest.fn(),
       post: jest.fn(),
       put: jest.fn(),
+      patch: jest.fn(),
       delete: jest.fn(),
       interceptors: {
         request: {
@@ -241,7 +242,72 @@ describe('AlteriomWebhookClient - API Endpoints', () => {
     });
   });
 
-  describe('Endpoint Path Verification', () => {
+  describe('agentSubscriptions', () => {
+    it('should call GET /api/v1/subscriptions for list', async () => {
+      mockAxiosInstance.get.mockResolvedValue({ data: { subscriptions: [], total: 0 } });
+      await client.agentSubscriptions.list();
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/subscriptions', { params: undefined });
+    });
+
+    it('should call GET /api/v1/subscriptions/:id for get', async () => {
+      mockAxiosInstance.get.mockResolvedValue({ data: { id: 'sub-1', agent_name: 'test' } });
+      await client.agentSubscriptions.get('sub-1');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/subscriptions/sub-1');
+    });
+
+    it('should call POST /api/v1/subscriptions for create', async () => {
+      mockAxiosInstance.post.mockResolvedValue({ data: { id: 'sub-1' } });
+      await client.agentSubscriptions.create({ agent_name: 'test', delivery_mode: 'on_demand', events: [] });
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/subscriptions', expect.any(Object));
+    });
+
+    it('should call PATCH /api/v1/subscriptions/:id for update', async () => {
+      mockAxiosInstance.patch.mockResolvedValue({ data: { id: 'sub-1' } });
+      await client.agentSubscriptions.update('sub-1', { agent_name: 'updated' });
+      expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/api/v1/subscriptions/sub-1', { agent_name: 'updated' });
+    });
+
+    it('should call DELETE /api/v1/subscriptions/:id for delete', async () => {
+      mockAxiosInstance.delete.mockResolvedValue({ data: null });
+      await client.agentSubscriptions.delete('sub-1');
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/subscriptions/sub-1');
+    });
+
+    it('should call GET /api/v1/subscriptions/:id/stats for stats', async () => {
+      mockAxiosInstance.get.mockResolvedValue({ data: { total_deliveries: 0, success_rate: 0 } });
+      await client.agentSubscriptions.stats('sub-1');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/subscriptions/sub-1/stats');
+    });
+
+    it('poll() should fetch subscription then aggregates and filter by repos', async () => {
+      mockAxiosInstance.get.mockImplementation((url: string) => {
+        if (url === '/api/v1/subscriptions/sub-1') {
+          return Promise.resolve({ data: {
+            id: 'sub-1',
+            repositories: ['Alteriom/test-repo'],
+            event_types: ['workflow_run'],
+            filters: { repositories: ['Alteriom/test-repo'], event_types: ['workflow_run'] }
+          }});
+        }
+        if (url.includes('/api/v1/aggregates')) {
+          return Promise.resolve({ data: {
+            data: [
+              { id: '1', aggregate_type: 'workflow_run', repository: 'Alteriom/test-repo', last_event_at: new Date().toISOString(), summary: {} },
+              { id: '2', aggregate_type: 'pull_request', repository: 'Other/repo', last_event_at: new Date().toISOString(), summary: {} },
+            ],
+            hasMore: false, cursor: null, pagination: { total: 2 }
+          }});
+        }
+        return Promise.resolve({ data: {} });
+      });
+
+      const events = await client.agentSubscriptions.poll('sub-1', { since: '2026-01-01T00:00:00Z' });
+      expect(events).toHaveLength(1);
+      expect(events[0].repository).toBe('Alteriom/test-repo');
+    });
+  });
+
+    describe('Endpoint Path Verification', () => {
     it('should call endpoints with /api/ prefix (no version)', async () => {
       // Mock proper response structures
       mockAxiosInstance.get.mockImplementation((url: string) => {
