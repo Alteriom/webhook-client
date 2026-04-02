@@ -1005,9 +1005,14 @@ export interface AgentSubscription {
   agent_id: string;
   agent_name: string;
   events: string[];
-  filters: Record<string, unknown>;
-  delivery_mode: 'push' | 'poll';
+  filters: {
+    repositories?: string[];
+    event_types?: string[];
+    actions?: string[];
+  };
+  delivery_mode: 'realtime' | 'aggregate' | 'on_demand';
   delivery_url: string | null;
+  webhook_url?: string | null;
   enabled: boolean;
   created_at: string;
   updated_at: string;
@@ -1017,12 +1022,31 @@ export interface AgentSubscription {
  * Agent subscription create request
  */
 export interface AgentSubscriptionCreateRequest {
-  agent_id: string;
+  agent_id?: string;
   agent_name: string;
-  events: string[];
-  filters?: Record<string, unknown>;
-  delivery_mode: 'push' | 'poll';
+  events?: string[];
+  repositories?: string[];
+  event_types?: string[];
+  filters?: {
+    repositories?: string[];
+    event_types?: string[];
+    actions?: string[];
+  };
+  delivery_mode: 'realtime' | 'aggregate' | 'on_demand';
   delivery_url?: string;
+  webhook_url?: string;
+}
+
+/**
+ * Agent subscription delivery stats
+ */
+export interface SubscriptionStats {
+  subscription_id: string;
+  total_deliveries: number;
+  successful_deliveries: number;
+  failed_deliveries: number;
+  success_rate: number;
+  last_delivery_at: string | null;
 }
 
 // ============================================================================
