@@ -565,6 +565,26 @@ console.log(`Success rate: ${stats.success_rate}%`);
 await client.agentSubscriptions.delete(subscription.id);
 \`\`\`
 
+#### On-Demand Polling
+
+For `on_demand` subscriptions, use `poll()` to fetch new events matching your subscription's filters:
+
+\`\`\`typescript
+// Simple polling — reads repo/event filters from the subscription automatically
+const events = await client.agentSubscriptions.poll(
+  'acfdd1a3-e29c-451c-8db9-be8e76918c4f',
+  { since: lastCheckTimestamp }
+);
+
+console.log(`Found ${events.length} new events`);
+events.forEach(e => {
+  console.log(`${e.aggregate_type} on ${e.repository}: ${e.summary?.conclusion || e.summary?.status}`);
+});
+
+// Update your timestamp for next poll
+lastCheckTimestamp = new Date().toISOString();
+\`\`\`
+
 ### Events API
 
 \`\`\`typescript

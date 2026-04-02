@@ -998,7 +998,10 @@ export interface QueryLog {
 // ============================================================================
 
 /**
- * Agent subscription configuration
+ * Agent subscription configuration.
+ *
+ * For `on_demand` delivery mode, use `client.agentSubscriptions.poll(subscriptionId, { since })`
+ * to fetch new events matching this subscription's repo and event type filters.
  */
 export interface AgentSubscription {
   id: string;
