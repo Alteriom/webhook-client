@@ -1,6 +1,6 @@
 # @alteriom/webhook-client
 
-> Type-safe TypeScript client for [Alteriom Webhook Connector](https://github.com/Alteriom/alteriom-webhook-connector)
+> Type-safe TypeScript client for Alteriom Webhook Connector
 
 [![npm version](https://img.shields.io/npm/v/@alteriom/webhook-client)](https://www.npmjs.com/package/@alteriom/webhook-client)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -105,7 +105,7 @@ const ws = new WebSocketClient({
   url: 'https://webhook.alteriom.net',
   apiKey: process.env.WEBHOOK_API_KEY!,
   events: ['workflow_run', 'pull_request'],
-  repos: ['Alteriom/*', 'North-Relay/*'],
+  repos: ['your-org/*'],
 });
 
 ws.on('event', (event) => {
@@ -195,7 +195,7 @@ Monitor and manage Dependabot vulnerability alerts.
 \`\`\`typescript
 // List dependabot alerts with filters
 const alerts = await client.dependabotAlerts.list({
-  repository: 'Alteriom/webhook-connector',
+  repository: 'your-org/your-repo',
   state: 'open',
   severity: 'critical',
   ecosystem: 'npm',
@@ -217,7 +217,7 @@ alerts.data.forEach(alert => {
 const alert = await client.dependabotAlerts.get('alert-uuid');
 
 // Get alert statistics
-const stats = await client.dependabotAlerts.stats('Alteriom/webhook-connector');
+const stats = await client.dependabotAlerts.stats('your-org/your-repo');
 console.log('Total:', stats.total);
 console.log('By state:', stats.by_state);
 console.log('By severity:', stats.by_severity);
@@ -237,7 +237,7 @@ Manage code scanning security alerts (CodeQL, etc.).
 \`\`\`typescript
 // List code scanning alerts
 const alerts = await client.codeScanningAlerts.list({
-  repository: 'Alteriom/webhook-connector',
+  repository: 'your-org/your-repo',
   state: 'open',
   severity: 'error',
   limit: 50,
@@ -263,7 +263,7 @@ Monitor exposed secrets in code.
 \`\`\`typescript
 // List secret scanning alerts
 const alerts = await client.secretScanningAlerts.list({
-  repository: 'Alteriom/webhook-connector',
+  repository: 'your-org/your-repo',
   state: 'open',
 });
 
@@ -324,13 +324,13 @@ const repos = await client.repositories.list();
 const monitored = await client.repositories.list({ scan_enabled: true });
 
 // Get repository details
-const repo = await client.repositories.get('Alteriom', 'webhook-connector');
+const repo = await client.repositories.get('your-org', 'your-repo');
 console.log('Scan enabled:', repo.scan_enabled);
 console.log('Language:', repo.language);
 console.log('Topics:', repo.topics);
 
 // Enable security scanning for repository
-await client.repositories.update('Alteriom', 'webhook-connector', {
+await client.repositories.update('your-org', 'your-repo', {
   scan_enabled: true,
 });
 
@@ -503,7 +503,7 @@ Monitor CI/CD pipeline statuses.
 const pipelines = await client.pipelines.list();
 
 // List pipelines for specific repository
-const repoPipelines = await client.pipelines.list('Alteriom/webhook-connector');
+const repoPipelines = await client.pipelines.list('your-org/your-repo');
 
 repoPipelines.forEach(pipeline => {
   console.log(`${pipeline.workflow_name} #${pipeline.run_number}: ${pipeline.status}`);
@@ -513,7 +513,7 @@ repoPipelines.forEach(pipeline => {
 });
 
 // Get pipelines for owner/repo
-const specific = await client.pipelines.get('Alteriom', 'webhook-connector');
+const specific = await client.pipelines.get('your-org', 'your-repo');
 \`\`\`
 
 ### Query Logs API (NEW in v0.1.0)
@@ -538,11 +538,10 @@ Agent subscriptions provide fine-grained filtering per agent — subscribe only 
 \`\`\`typescript
 // Create a CI monitoring subscription for Jarvis
 const subscription = await client.agentSubscriptions.create({
-  agent_name: 'jarvis-ci-monitor',
+  agent_name: 'ci-monitor',
   repositories: [
-    'North-Relay/northrelay-platform',
-    'Alteriom/alteriom-dev-ops',
-    'Alteriom/alteriom-webhook-connector'
+    'your-org/api',
+    'your-org/web'
   ],
   event_types: ['workflow_run', 'workflow_job', 'deployment_status'],
   delivery_mode: 'realtime',
@@ -554,7 +553,7 @@ const { subscriptions } = await client.agentSubscriptions.list();
 
 // Update subscription (add a repo)
 await client.agentSubscriptions.update(subscription.id, {
-  filters: { repositories: ['North-Relay/northrelay-platform', 'Alteriom/new-repo'] },
+  filters: { repositories: ['your-org/api', 'your-org/new-repo'] },
 });
 
 // Get delivery stats
@@ -901,10 +900,8 @@ MIT © [Alteriom](https://github.com/Alteriom)
 
 ## Links
 
-- **Documentation:** [https://docs.alteriom.net](https://docs.alteriom.net)
 - **GitHub:** [https://github.com/Alteriom/webhook-client](https://github.com/Alteriom/webhook-client)
 - **NPM:** [https://www.npmjs.com/package/@alteriom/webhook-client](https://www.npmjs.com/package/@alteriom/webhook-client)
-- **Webhook Connector:** [https://github.com/Alteriom/alteriom-webhook-connector](https://github.com/Alteriom/alteriom-webhook-connector)
 
 ## Support
 
