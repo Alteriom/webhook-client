@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- The package root loads without `socket.io-client` installed: `WebSocketClient` now loads the optional peer on its first `connect()` and, when it is missing, throws an error saying to install it. Before, `require('@alteriom/webhook-client')` failed with `MODULE_NOT_FOUND` for REST-only consumers.
+
+### Changed
+- Development dependencies: jest 30 and an `overrides` entry for `js-yaml` under `@istanbuljs/load-nyc-config`, so `npm audit` is clean again (braces and sprintf-js advisories have no patched release). The lockfile resolves axios 1.20.0.
+
 ## [1.1.0] - 2026-03-28
 
 ### Added
