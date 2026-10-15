@@ -1,6 +1,6 @@
 ---
 verified_at: 2026-10-15
-verified_commit: 3e2e8fea5fa683a579f72427e93fc1a355458d1b
+verified_commit: b26bdab7b9141efa6a7dd266b41ca54d1b95de1e
 ---
 
 # Architecture — where each part of the client lives
@@ -15,7 +15,7 @@ verified_commit: 3e2e8fea5fa683a579f72427e93fc1a355458d1b
 ## The receiver and the stream
 
 - `src/receiver.ts:98` `webhookReceiver`: the payload size limit, the signature and timestamp headers, the timestamp age check against replay, an HMAC-SHA256 signature compared in constant time (`src/receiver.ts:62`), and a duplicate-delivery cache. `generateWebhookSignature` (`src/receiver.ts:29`) signs test payloads the same way. `src/adapters.ts` wraps it for Express, Fastify and Next.js.
-- `src/ws-client.ts` `WebSocketClient` wraps `socket.io-client` (an optional peer dependency, `package.json:46`): connect with the API key, re-subscribe on every reconnect, typed handlers from `src/ws-types.ts`. Its design is `docs/superpowers/specs/2026-03-28-websocket-client-design.md`.
+- `src/ws-client.ts` `WebSocketClient` wraps `socket.io-client` (an optional peer dependency, `package.json:46`, loaded on the first `connect()`): connect with the API key, re-subscribe on every reconnect, typed handlers from `src/ws-types.ts`. Its design is `docs/superpowers/specs/2026-03-28-websocket-client-design.md`.
 
 ## The package
 

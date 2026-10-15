@@ -247,7 +247,7 @@
     },
     {
       "id": "shared-architecture.md",
-      "revision": 1,
+      "revision": 2,
       "kind": "fact",
       "layer": "L3",
       "state": "accepted",
@@ -261,78 +261,78 @@
         {
           "repo": "Alteriom/webhook-client",
           "path": "LICENSE",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "README.md",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "docs/superpowers/specs/2026-03-28-websocket-client-design.md",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "package.json",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/adapters.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/client.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/errors.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/guards.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/index.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/receiver.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/types.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/ws-client.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/ws-types.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "tsconfig.json",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         }
       ]
     },
     {
       "id": "shared-build-and-test.md",
-      "revision": 1,
+      "revision": 2,
       "kind": "fact",
       "layer": "L3",
       "state": "accepted",
@@ -346,72 +346,77 @@
         {
           "repo": "Alteriom/webhook-client",
           "path": ".github/workflows/ci.yml",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": ".github/workflows/docs.yml",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": ".github/workflows/icm-check.yml",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "CONTRIBUTING.md",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "README.md",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "eslint.config.js",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "jest.config.js",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "package.json",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/index.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "tests/client.test.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "tests/optional-peer.test.ts",
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "tests/receiver.test.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "tests/security.test.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "tests/types.test.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "tests/ws-client.test.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         }
       ]
     },
@@ -517,7 +522,7 @@
     },
     {
       "id": "shared-gotchas.md",
-      "revision": 1,
+      "revision": 2,
       "kind": "fact",
       "layer": "L3",
       "state": "accepted",
@@ -531,37 +536,37 @@
         {
           "repo": "Alteriom/webhook-client",
           "path": ".github/workflows/ci.yml",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "CHANGELOG.md",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
-        },
-        {
-          "repo": "Alteriom/webhook-client",
-          "path": "README.md",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "package.json",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/client.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/index.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         },
         {
           "repo": "Alteriom/webhook-client",
           "path": "src/ws-client.ts",
-          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "tests/optional-peer.test.ts",
+          "commit": "b26bdab7b9141efa6a7dd266b41ca54d1b95de1e"
         }
       ]
     },

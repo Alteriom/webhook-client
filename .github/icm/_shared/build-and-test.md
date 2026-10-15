@@ -1,6 +1,6 @@
 ---
 verified_at: 2026-10-15
-verified_commit: 3e2e8fea5fa683a579f72427e93fc1a355458d1b
+verified_commit: b26bdab7b9141efa6a7dd266b41ca54d1b95de1e
 ---
 
 # Build and test — the commands, and what CI runs
@@ -13,7 +13,7 @@ verified_commit: 3e2e8fea5fa683a579f72427e93fc1a355458d1b
 
 ## Where a test belongs
 
-One suite per area in `tests/`: REST groups and their paths in `tests/client.test.ts` (and the security, repository, HTTP-subscriber and API-key groups in `tests/security.test.ts`); signing and the receiver in `tests/receiver.test.ts`; type narrowing in `tests/types.test.ts`; the stream in `tests/ws-client.test.ts`. REST tests mock `axios.create` and assert the method, path and body sent (`tests/client.test.ts` "Endpoint Path Verification"); no test reaches a network. The Arrange/Act/Assert shape and JSDoc rules are `CONTRIBUTING.md` "Testing Guidelines" and "Documentation".
+One suite per area in `tests/`: REST groups and their paths in `tests/client.test.ts` (and the security, repository, HTTP-subscriber and API-key groups in `tests/security.test.ts`); signing and the receiver in `tests/receiver.test.ts`; type narrowing in `tests/types.test.ts`; the stream in `tests/ws-client.test.ts`; loading the package root without the optional peer in `tests/optional-peer.test.ts`. REST tests mock `axios.create` and assert the method, path and body sent (`tests/client.test.ts` "Endpoint Path Verification"); no test reaches a network. The Arrange/Act/Assert shape and JSDoc rules are `CONTRIBUTING.md` "Testing Guidelines" and "Documentation".
 
 ## What CI runs
 
