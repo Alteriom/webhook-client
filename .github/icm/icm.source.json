@@ -1,0 +1,851 @@
+{
+  "workspace_root": "",
+  "schema_version": 2,
+  "access": "workspace",
+  "entrypoint": "AGENTS.md",
+  "runtimes": [
+    "claude_code",
+    "codex_cli"
+  ],
+  "projects": [
+    "webhook-client"
+  ],
+  "nodes": [
+    {
+      "id": "AGENTS.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L0",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "CLAUDE.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L0",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "id": "01-fix-CLAUDE.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L1",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/01-fix/CLAUDE.md"
+      ]
+    },
+    {
+      "id": "01-fix-CONTEXT.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L1",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/01-fix/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "01-fix-stages-01_reproduce-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/01-fix/stages/01_reproduce/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "01-fix-stages-02_fix-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/01-fix/stages/02_fix/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "01-fix-stages-03_verify-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/01-fix/stages/03_verify/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "02-endpoint-CLAUDE.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L1",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/02-endpoint/CLAUDE.md"
+      ]
+    },
+    {
+      "id": "02-endpoint-CONTEXT.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L1",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/02-endpoint/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "02-endpoint-stages-01_spec-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/02-endpoint/stages/01_spec/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "02-endpoint-stages-02_implement-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/02-endpoint/stages/02_implement/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "02-endpoint-stages-03_verify-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/02-endpoint/stages/03_verify/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "03-release-CLAUDE.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L1",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/03-release/CLAUDE.md"
+      ]
+    },
+    {
+      "id": "03-release-CONTEXT.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L1",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/03-release/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "03-release-stages-01_plan-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/03-release/stages/01_plan/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "03-release-stages-02_prepare-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/03-release/stages/02_prepare/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "03-release-stages-03_publish-CONTEXT.md",
+      "revision": 1,
+      "kind": "stage",
+      "layer": "L2",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/03-release/stages/03_publish/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "shared-CONTEXT.md",
+      "revision": 1,
+      "kind": "route",
+      "layer": "L1",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/_shared/CONTEXT.md"
+      ]
+    },
+    {
+      "id": "shared-architecture.md",
+      "revision": 1,
+      "kind": "fact",
+      "layer": "L3",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/_shared/architecture.md"
+      ],
+      "evidence": [
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "LICENSE",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "README.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "docs/superpowers/specs/2026-03-28-websocket-client-design.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "package.json",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/adapters.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/client.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/errors.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/guards.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/index.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/receiver.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/types.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/ws-client.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/ws-types.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "tsconfig.json",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        }
+      ]
+    },
+    {
+      "id": "shared-build-and-test.md",
+      "revision": 1,
+      "kind": "fact",
+      "layer": "L3",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/_shared/build-and-test.md"
+      ],
+      "evidence": [
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": ".github/workflows/ci.yml",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": ".github/workflows/docs.yml",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": ".github/workflows/icm-check.yml",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "CONTRIBUTING.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "README.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "eslint.config.js",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "jest.config.js",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "package.json",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/index.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "tests/client.test.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "tests/receiver.test.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "tests/security.test.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "tests/types.test.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "tests/ws-client.test.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        }
+      ]
+    },
+    {
+      "id": "shared-documents.md",
+      "revision": 1,
+      "kind": "fact",
+      "layer": "L3",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/_shared/documents.md"
+      ],
+      "evidence": [
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": ".eslintrc.json",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": ".github/workflows/release.yml",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "CHANGELOG.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "CONTRIBUTING.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "README.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "docs/superpowers/plans/2026-03-28-websocket-client.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "docs/superpowers/specs/2026-03-28-websocket-client-design.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "eslint.config.js",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "jest.config.js",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "package.json",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "schemas/openapi.json",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/client.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/index.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/receiver.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/types.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/ws-client.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/ws-types.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        }
+      ]
+    },
+    {
+      "id": "shared-gotchas.md",
+      "revision": 1,
+      "kind": "fact",
+      "layer": "L3",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/_shared/gotchas.md"
+      ],
+      "evidence": [
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": ".github/workflows/ci.yml",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "CHANGELOG.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "README.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "package.json",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/client.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/index.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "src/ws-client.ts",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        }
+      ]
+    },
+    {
+      "id": "shared-release.md",
+      "revision": 1,
+      "kind": "fact",
+      "layer": "L3",
+      "state": "accepted",
+      "project_id": "webhook-client",
+      "verified_at": "2026-10-15",
+      "review_after": "2027-01-13",
+      "files": [
+        ".github/icm/_shared/release.md"
+      ],
+      "evidence": [
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": ".github/workflows/release.yml",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "CHANGELOG.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "CONTRIBUTING.md",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        },
+        {
+          "repo": "Alteriom/webhook-client",
+          "path": "package.json",
+          "commit": "3e2e8fea5fa683a579f72427e93fc1a355458d1b"
+        }
+      ]
+    }
+  ],
+  "forms": [
+    {
+      "form": "umbrella",
+      "root": "",
+      "pipelines": [
+        ".github/icm/01-fix",
+        ".github/icm/02-endpoint",
+        ".github/icm/03-release"
+      ],
+      "unit": "run"
+    },
+    {
+      "form": "pipeline",
+      "root": ".github/icm/01-fix",
+      "unit": "run"
+    },
+    {
+      "form": "pipeline",
+      "root": ".github/icm/02-endpoint",
+      "unit": "run"
+    },
+    {
+      "form": "pipeline",
+      "root": ".github/icm/03-release",
+      "unit": "run"
+    }
+  ],
+  "stages": {
+    "fix-reproduce": {
+      "order": 1,
+      "contract": ".github/icm/01-fix/stages/01_reproduce/CONTEXT.md",
+      "inputs": {
+        "working": [],
+        "reference": [
+          ".github/icm/_shared/architecture.md",
+          ".github/icm/_shared/build-and-test.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/02-endpoint/",
+        ".github/icm/03-release/",
+        ".github/icm/_shared/release.md"
+      ],
+      "outputs": [
+        ".github/icm/01-fix/stages/01_reproduce/output/reproduction.md"
+      ],
+      "human_check": "A person runs the command or reads its output and confirms it fails for the reported reason and not a neighbouring one.",
+      "required": [
+        "01-fix-stages-01_reproduce-CONTEXT.md"
+      ],
+      "optional": [
+        "shared-gotchas.md"
+      ]
+    },
+    "fix-fix": {
+      "order": 2,
+      "contract": ".github/icm/01-fix/stages/02_fix/CONTEXT.md",
+      "inputs": {
+        "working": [
+          ".github/icm/01-fix/stages/01_reproduce/output/reproduction.md"
+        ],
+        "reference": [
+          ".github/icm/_shared/architecture.md",
+          ".github/icm/_shared/build-and-test.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/02-endpoint/",
+        ".github/icm/03-release/",
+        ".github/icm/_shared/release.md"
+      ],
+      "outputs": [
+        ".github/icm/01-fix/stages/02_fix/output/change.md"
+      ],
+      "human_check": "A person reads the diff beside the reproduction: it removes the cause, not only the symptom, and no exported signature or receiver check changed. Edit `change.md` if the explanation is wrong; stage 03 reads it.",
+      "required": [
+        "01-fix-stages-02_fix-CONTEXT.md"
+      ]
+    },
+    "fix-verify": {
+      "order": 3,
+      "contract": ".github/icm/01-fix/stages/03_verify/CONTEXT.md",
+      "inputs": {
+        "working": [
+          ".github/icm/01-fix/stages/02_fix/output/change.md"
+        ],
+        "reference": [
+          ".github/icm/_shared/build-and-test.md",
+          ".github/icm/_shared/gotchas.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/02-endpoint/",
+        ".github/icm/03-release/"
+      ],
+      "outputs": [
+        ".github/icm/01-fix/stages/03_verify/output/pull-request.md"
+      ],
+      "human_check": "A person reads `pull-request.md` and its evidence, then says whether to open it. The reviewer, not the author, merges, once every check on the last commit is green.",
+      "required": [
+        "01-fix-stages-03_verify-CONTEXT.md"
+      ]
+    },
+    "endpoint-spec": {
+      "order": 1,
+      "contract": ".github/icm/02-endpoint/stages/01_spec/CONTEXT.md",
+      "inputs": {
+        "working": [],
+        "reference": [
+          ".github/icm/_shared/architecture.md",
+          ".github/icm/_shared/release.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/01-fix/",
+        ".github/icm/03-release/",
+        "schemas/openapi.json"
+      ],
+      "outputs": [
+        ".github/icm/02-endpoint/stages/01_spec/output/spec.md"
+      ],
+      "human_check": "A maintainer confirms the contract matches the service, approves the names and signatures, and accepts the version class. An exported name is permanent once published.",
+      "required": [
+        "02-endpoint-stages-01_spec-CONTEXT.md"
+      ],
+      "optional": [
+        "shared-gotchas.md"
+      ]
+    },
+    "endpoint-implement": {
+      "order": 2,
+      "contract": ".github/icm/02-endpoint/stages/02_implement/CONTEXT.md",
+      "inputs": {
+        "working": [
+          ".github/icm/02-endpoint/stages/01_spec/output/spec.md"
+        ],
+        "reference": [
+          ".github/icm/_shared/architecture.md",
+          ".github/icm/_shared/build-and-test.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/01-fix/",
+        ".github/icm/03-release/"
+      ],
+      "outputs": [
+        ".github/icm/02-endpoint/stages/02_implement/output/change.md"
+      ],
+      "human_check": "A person reads the diff beside the approved spec: the names, signatures and paths match it, every method follows the group pattern, and every method has a test asserting what it sends. Edit `change.md` if it is wrong; stage 03 reads it.",
+      "required": [
+        "02-endpoint-stages-02_implement-CONTEXT.md"
+      ]
+    },
+    "endpoint-verify": {
+      "order": 3,
+      "contract": ".github/icm/02-endpoint/stages/03_verify/CONTEXT.md",
+      "inputs": {
+        "working": [
+          ".github/icm/02-endpoint/stages/02_implement/output/change.md"
+        ],
+        "reference": [
+          ".github/icm/_shared/build-and-test.md",
+          ".github/icm/_shared/gotchas.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/01-fix/",
+        ".github/icm/03-release/"
+      ],
+      "outputs": [
+        ".github/icm/02-endpoint/stages/03_verify/output/pull-request.md"
+      ],
+      "human_check": "A person reads `pull-request.md` and the README section and says whether to open it. The reviewer merges once every check is green.",
+      "required": [
+        "02-endpoint-stages-03_verify-CONTEXT.md"
+      ]
+    },
+    "release-plan": {
+      "order": 1,
+      "contract": ".github/icm/03-release/stages/01_plan/CONTEXT.md",
+      "inputs": {
+        "working": [],
+        "reference": [
+          ".github/icm/_shared/release.md",
+          ".github/icm/_shared/gotchas.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/01-fix/",
+        ".github/icm/02-endpoint/"
+      ],
+      "outputs": [
+        ".github/icm/03-release/stages/01_plan/output/release-plan.md"
+      ],
+      "human_check": "A maintainer approves the version number and the changelog wording. The number is permanent once tagged: a mistake later costs a new version, never a retag.",
+      "required": [
+        "03-release-stages-01_plan-CONTEXT.md"
+      ]
+    },
+    "release-prepare": {
+      "order": 2,
+      "contract": ".github/icm/03-release/stages/02_prepare/CONTEXT.md",
+      "inputs": {
+        "working": [
+          ".github/icm/03-release/stages/01_plan/output/release-plan.md"
+        ],
+        "reference": [
+          ".github/icm/_shared/release.md",
+          ".github/icm/_shared/build-and-test.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/01-fix/",
+        ".github/icm/02-endpoint/"
+      ],
+      "outputs": [
+        ".github/icm/03-release/stages/02_prepare/output/release-pr.md"
+      ],
+      "human_check": "A maintainer reviews the final commit with every check green, merges it, and then decides to tag: `git tag vX.Y.Z <merge commit on main> && git push origin vX.Y.Z` publishes.",
+      "required": [
+        "03-release-stages-02_prepare-CONTEXT.md"
+      ]
+    },
+    "release-publish": {
+      "order": 3,
+      "contract": ".github/icm/03-release/stages/03_publish/CONTEXT.md",
+      "inputs": {
+        "working": [
+          ".github/icm/03-release/stages/02_prepare/output/release-pr.md"
+        ],
+        "reference": [
+          ".github/icm/_shared/release.md"
+        ]
+      },
+      "do_not_load": [
+        ".github/icm/01-fix/",
+        ".github/icm/02-endpoint/"
+      ],
+      "outputs": [
+        ".github/icm/03-release/stages/03_publish/output/publication.md"
+      ],
+      "human_check": "A person confirms the version is on npm and in the GitHub releases, built from `main`, before it is announced.",
+      "required": [
+        "03-release-stages-03_publish-CONTEXT.md"
+      ]
+    }
+  }
+}
