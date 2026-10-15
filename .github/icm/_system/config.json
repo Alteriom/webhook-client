@@ -1,0 +1,11 @@
+{
+  "standard": "1.1.0",
+  "repository": "Alteriom/webhook-client",
+  "project": "webhook-client",
+  "entry": "AGENTS.md",
+  "pointer": "CLAUDE.md",
+  "review_days": 90,
+  "documents_index": "_shared/documents.md",
+  "document_id_prefix": "doc-",
+  "forms": "umbrella"
+}
