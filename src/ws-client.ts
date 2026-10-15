@@ -1,5 +1,25 @@
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import type { WebhookEventPayload, WebSocketClientConfig, WebSocketEventMap } from './ws-types';
+
+/**
+ * socket.io-client is an optional peer dependency, so it is loaded on the first
+ * connect() rather than when the package root is required: REST-only consumers
+ * do not install it.
+ */
+function loadSocketIo(): typeof import('socket.io-client') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('socket.io-client');
+  } catch (err) {
+    const e = err as { code?: string; message?: string };
+    if (e.code === 'MODULE_NOT_FOUND' && e.message?.includes("'socket.io-client'")) {
+      throw new Error(
+        'WebSocketClient needs the optional peer dependency socket.io-client: npm install socket.io-client'
+      );
+    }
+    throw err;
+  }
+}
 
 export class WebSocketClient {
   private socket: Socket | null = null;
@@ -13,6 +33,7 @@ export class WebSocketClient {
   }
 
   connect(): void {
+    const { io } = loadSocketIo();
     this.socket = io(this.config.url, {
       path: '/ws',
       auth: {
