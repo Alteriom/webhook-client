@@ -16,7 +16,7 @@ Generated via GitHub Copilot GPT-4 with cost tracking.</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">Enrichment</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#complexity">complexity</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cost_usd">cost_usd</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#risk_level">risk_level</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;low&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;medium&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;high&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;critical&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#security_concerns">security_concerns</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#suggested_actions">suggested_actions</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#summary">summary</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L47">src/types.ts:47</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L47">src/types.ts:47</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -40,42 +40,42 @@ Generated via GitHub Copilot GPT-4 with cost tracking.</p>
 <div class="tsd-comment tsd-typography"><p>Complexity score (1-10)</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L55">src/types.ts:55</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L55">src/types.ts:55</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cost_usd"><code class="tsd-tag">Optional</code><span>cost_<wbr/>usd</span><a href="#cost_usd" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cost_usd</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Cost in USD for generating this enrichment</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L64">src/types.ts:64</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L64">src/types.ts:64</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="risk_level"><span>risk_<wbr/>level</span><a href="#risk_level" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">risk_level</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;low&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;medium&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;high&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;critical&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>Risk assessment: low, medium, high, or critical</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L52">src/types.ts:52</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L52">src/types.ts:52</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="security_concerns"><span>security_<wbr/>concerns</span><a href="#security_concerns" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">security_concerns</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 <div class="tsd-comment tsd-typography"><p>Array of security concerns identified</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L58">src/types.ts:58</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L58">src/types.ts:58</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="suggested_actions"><span>suggested_<wbr/>actions</span><a href="#suggested_actions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">suggested_actions</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 <div class="tsd-comment tsd-typography"><p>AI-suggested actions for the agent to take</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L61">src/types.ts:61</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L61">src/types.ts:61</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="summary"><span>summary</span><a href="#summary" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">summary</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>2-3 sentence summary of the aggregate</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L49">src/types.ts:49</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L49">src/types.ts:49</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

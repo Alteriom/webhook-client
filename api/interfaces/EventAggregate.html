@@ -15,7 +15,7 @@
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">EventAggregate</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#aggregate_type">aggregate_type</a><span class="tsd-signature-symbol">:</span> <a href="../types/AggregateType.html" class="tsd-signature-type tsd-kind-type-alias">AggregateType</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#enrichment">enrichment</a><span class="tsd-signature-symbol">?:</span> <a href="Enrichment.html" class="tsd-signature-type tsd-kind-interface">Enrichment</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#entity_id">entity_id</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#entity_type">entity_type</a><span class="tsd-signature-symbol">:</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;issue&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;pull_request&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;commit&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;discussion&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;release&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;workflow&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;other&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#event_count">event_count</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#first_event_at">first_event_at</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#id">id</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#last_event_at">last_event_at</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#repository">repository</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#summary">summary</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L30">src/types.ts:30</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L30">src/types.ts:30</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -41,52 +41,52 @@
 <h3 class="tsd-anchor-link" id="aggregate_type"><span>aggregate_<wbr/>type</span><a href="#aggregate_type" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">aggregate_type</span><span class="tsd-signature-symbol">:</span> <a href="../types/AggregateType.html" class="tsd-signature-type tsd-kind-type-alias">AggregateType</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L35">src/types.ts:35</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L35">src/types.ts:35</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="enrichment"><code class="tsd-tag">Optional</code><span>enrichment</span><a href="#enrichment" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">enrichment</span><span class="tsd-signature-symbol">?:</span> <a href="Enrichment.html" class="tsd-signature-type tsd-kind-interface">Enrichment</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L40">src/types.ts:40</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L40">src/types.ts:40</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="entity_id"><span>entity_<wbr/>id</span><a href="#entity_id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">entity_id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L34">src/types.ts:34</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L34">src/types.ts:34</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="entity_type"><span>entity_<wbr/>type</span><a href="#entity_type" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">entity_type</span><span class="tsd-signature-symbol">:</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;issue&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;pull_request&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;commit&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;discussion&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;release&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;workflow&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;other&quot;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L33">src/types.ts:33</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L33">src/types.ts:33</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="event_count"><span>event_<wbr/>count</span><a href="#event_count" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">event_count</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L37">src/types.ts:37</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L37">src/types.ts:37</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="first_event_at"><span>first_<wbr/>event_<wbr/>at</span><a href="#first_event_at" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">first_event_at</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L38">src/types.ts:38</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L38">src/types.ts:38</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="id"><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L31">src/types.ts:31</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L31">src/types.ts:31</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="last_event_at"><span>last_<wbr/>event_<wbr/>at</span><a href="#last_event_at" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">last_event_at</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L39">src/types.ts:39</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L39">src/types.ts:39</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="repository"><span>repository</span><a href="#repository" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">repository</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L32">src/types.ts:32</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L32">src/types.ts:32</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="summary"><span>summary</span><a href="#summary" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">summary</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/3e2e8fea5fa683a579f72427e93fc1a355458d1b/src/types.ts#L36">src/types.ts:36</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/Alteriom/webhook-client/blob/b26bdab7b9141efa6a7dd266b41ca54d1b95de1e/src/types.ts#L36">src/types.ts:36</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
